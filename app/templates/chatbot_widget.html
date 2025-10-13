@@ -364,7 +364,7 @@
 // Chatbot Widget JavaScript
 (function() {
     const toggle = document.getElementById('chatbotToggle');
-    const window = document.getElementById('chatbotWindow');
+    const chatbotWindow = document.getElementById('chatbotWindow');
     const close = document.getElementById('chatbotClose');
     const form = document.getElementById('chatbotForm');
     const input = document.getElementById('chatbotInput');
@@ -375,7 +375,7 @@
     // Toggle chatbot
     toggle.addEventListener('click', () => {
         isOpen = !isOpen;
-        window.classList.toggle('active', isOpen);
+        chatbotWindow.classList.toggle('active', isOpen);
         
         if (isOpen && messages.children.length === 0) {
             // Send initial greeting
@@ -385,7 +385,7 @@
     
     close.addEventListener('click', () => {
         isOpen = false;
-        window.classList.remove('active');
+        chatbotWindow.classList.remove('active');
     });
     
     // Handle form submission

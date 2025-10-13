@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 bg-dark text-white sidebar" style="min-height: 100vh;">
+                <div class="position-sticky pt-3">
+                    <h5 class="text-warning mb-3">Admin Menu</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white active" href="#" data-section="overview" onclick="showSection('overview', event)">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="users" onclick="showSection('users', event)">
+                                <i class="fas fa-users me-2"></i>Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="vendors" onclick="showSection('vendors', event)">
+                                <i class="fas fa-user-tie me-2"></i>Vendors
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#" data-section="bookings" onclick="showSection('bookings', event)">
+                                <i class="fas fa-calendar me-2"></i>Bookings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10">
+                <!-- Overview Section -->
+                <div id="overviewSection" class="dashboard-section">
+                    <h3>Overview Section</h3>
+                    <p>This is the overview section content.</p>
+                </div>
+
+                <!-- Users Section -->
+                <div id="usersSection" class="dashboard-section d-none">
+                    <h3>Users Section</h3>
+                    <p>This is the users section content.</p>
+                </div>
+
+                <!-- Vendors Section -->
+                <div id="vendorsSection" class="dashboard-section d-none">
+                    <h3>Vendors Section</h3>
+                    <p>This is the vendors section content.</p>
+                </div>
+
+                <!-- Bookings Section -->
+                <div id="bookingsSection" class="dashboard-section d-none">
+                    <h3>Bookings Section</h3>
+                    <p>This is the bookings section content.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showSection(section, evt) {
+            console.log('showSection called with:', section);
+            if (evt && typeof evt.preventDefault === 'function') evt.preventDefault();
+            
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('d-none'));
+            
+            // Show target section
+            const target = document.getElementById(section + 'Section');
+            console.log('Target element:', target);
+            if (target) {
+                target.classList.remove('d-none');
+                console.log('Section shown:', section);
+            } else {
+                console.error('Section not found:', section + 'Section');
+            }
+            
+            // Update active menu item
+            document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
+                link.classList.toggle('active', link.getAttribute('data-section') === section);
+            });
+        }
+
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, showing overview');
+            showSection('overview');
+        });
+    </script>
+
+    <style>
+        .nav-link {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+        }
+    </style>
+</body>
+</html>

@@ -11,43 +11,43 @@
                 <h5 class="text-warning mb-3">Admin Menu</h5>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link text-white active" href="#" onclick="showSection('overview', event)">
+                        <a class="nav-link text-white active" href="#" data-section="overview" onclick="showSection('overview', event)">
                             <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('users', event)">
+                        <a class="nav-link text-white" href="#" data-section="users" onclick="showSection('users', event)">
                             <i class="fas fa-users me-2"></i>Users
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('vendors', event)">
+                        <a class="nav-link text-white" href="#" data-section="vendors" onclick="showSection('vendors', event)">
                             <i class="fas fa-user-tie me-2"></i>Vendors
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('bookings', event)">
+                        <a class="nav-link text-white" href="#" data-section="bookings" onclick="showSection('bookings', event)">
                             <i class="fas fa-calendar me-2"></i>Bookings
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('operating', event)">
+                        <a class="nav-link text-white" href="#" data-section="operating" onclick="showSection('operating', event)">
                             <i class="fas fa-truck me-2"></i>Operating
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('services', event)">
+                        <a class="nav-link text-white" href="#" data-section="services" onclick="showSection('services', event)">
                             <i class="fas fa-tools me-2"></i>Services
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('financial', event)">
+                        <a class="nav-link text-white" href="#" data-section="financial" onclick="showSection('financial', event)">
                             <i class="fas fa-rupee-sign me-2"></i>Financial
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#" onclick="showSection('profile', event)">
+                        <a class="nav-link text-white" href="#" data-section="profile" onclick="showSection('profile', event)">
                             <i class="fas fa-user-cog me-2"></i>Profile Settings
                         </a>
                     </li>
@@ -152,6 +152,9 @@
             <!-- Users Section -->
             <div id="usersSection" class="dashboard-section d-none">
                 <h3 class="mb-3">User Management</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Users section is now active. Loading user data...
+                </div>
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="row g-2 align-items-end">
@@ -207,6 +210,9 @@
             <!-- Vendors Section -->
             <div id="vendorsSection" class="dashboard-section d-none">
                 <h3 class="mb-3">Vendor Management</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Vendors section is now active. Loading vendor data...
+                </div>
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="row g-2 align-items-end">
@@ -284,6 +290,9 @@
             <!-- Bookings Section -->
             <div id="bookingsSection" class="dashboard-section d-none">
                 <h3 class="mb-3">Booking Management</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Bookings section is now active. Loading booking data...
+                </div>
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="row g-2 align-items-end">
@@ -334,6 +343,9 @@
             <!-- Operating Section -->
             <div id="operatingSection" class="dashboard-section d-none">
                 <h3 class="mb-3">Booking & Operating</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Operating section is now active. Loading live jobs...
+                </div>
                 <div class="card mb-3">
                     <div class="card-header bg-light fw-semibold">Live Jobs</div>
                     <div class="card-body">
@@ -426,6 +438,9 @@
             <!-- Services Section -->
             <div id="servicesSection" class="dashboard-section d-none">
                 <h3 class="mb-3">Service Management</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Services section is now active. Loading services...
+                </div>
                 <div class="card mb-3">
                     <div class="card-body">
                         <form class="row g-2" onsubmit="return createService(event)">
@@ -537,6 +552,9 @@
             <!-- Financial Section -->
             <div id="financialSection" class="dashboard-section d-none">
                 <h3 class="mb-3">Financial Management</h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>Financial section is now active. Loading financial data...
+                </div>
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <div class="card text-bg-success">
@@ -707,135 +725,192 @@
         if (profileForm) {
             profileForm.addEventListener('submit', handleProfileSubmit);
         }
+
+        // Wire up filters to auto-refresh their tables
+        const userRoleSel = document.getElementById('filterUserRole');
+        const userActiveSel = document.getElementById('filterUserActive');
+        if (userRoleSel) userRoleSel.addEventListener('change', loadUsers);
+        if (userActiveSel) userActiveSel.addEventListener('change', loadUsers);
+
+        const vendorStatusSel = document.getElementById('filterVendorStatus');
+        const vendorAvailSel = document.getElementById('filterVendorAvailable');
+        if (vendorStatusSel) vendorStatusSel.addEventListener('change', loadAdminVendors);
+        if (vendorAvailSel) vendorAvailSel.addEventListener('change', loadAdminVendors);
+
+        const bookingStatusSel = document.getElementById('filterBookingStatus');
+        if (bookingStatusSel) bookingStatusSel.addEventListener('change', loadAdminBookings);
+
+        const paymentStatusSel = document.getElementById('filterPaymentStatus');
+        const paymentTypeSel = document.getElementById('filterPaymentType');
+        if (paymentStatusSel) paymentStatusSel.addEventListener('change', loadPayments);
+        if (paymentTypeSel) paymentTypeSel.addEventListener('change', loadPayments);
+
+        // Default section on load
+        showSection('overview');
     });
 
     function showSection(section, evt) {
+        console.log('showSection called with:', section);
+        if (evt && typeof evt.preventDefault === 'function') evt.preventDefault();
+
+        // Hide all sections
         document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('d-none'));
-        document.getElementById(section + 'Section').classList.remove('d-none');
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
-        if (evt && evt.target) {
-            evt.target.classList.add('active');
+
+        // Show target section
+        const target = document.getElementById(section + 'Section');
+        console.log('Target element:', target);
+        if (target) {
+            target.classList.remove('d-none');
+            console.log('Section shown:', section);
+        } else {
+            console.error('Section not found:', section + 'Section');
         }
+
+        // Update active menu item
+        document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-section') === section);
+        });
 
         // Load section data
-        if (section === 'profile') {
-            loadProfile();
-        } else if (section === 'users') {
-            loadUsers();
-        } else if (section === 'vendors') {
-            loadAdminVendors();
-            loadPendingPayouts();
-        } else if (section === 'bookings') {
-            loadAdminBookings();
-        } else if (section === 'services') {
-            loadServices();
-        } else if (section === 'financial') {
-            loadFinance();
-        } else if (section === 'operating') {
-            loadOperating();
+        try {
+            if (section === 'profile') {
+                loadProfile();
+            } else if (section === 'users') {
+                loadUsers().catch(err => console.error('Failed to load users:', err));
+            } else if (section === 'vendors') {
+                loadAdminVendors().catch(err => console.error('Failed to load vendors:', err));
+                loadPendingPayouts().catch(err => console.error('Failed to load payouts:', err));
+            } else if (section === 'bookings') {
+                loadAdminBookings().catch(err => console.error('Failed to load bookings:', err));
+            } else if (section === 'services') {
+                loadServices().catch(err => console.error('Failed to load services:', err));
+            } else if (section === 'financial') {
+                loadFinance().catch(err => console.error('Failed to load finance:', err));
+            } else if (section === 'operating') {
+                loadOperating().catch(err => console.error('Failed to load operating:', err));
+            }
+        } catch (error) {
+            console.error('Error loading section data:', error);
         }
+    }
 
+    async function loadFinance() {
+        await Promise.all([loadFinanceSummary(), loadPayments(), loadFinancePendingPayouts()]);
+    }
 
-        async function loadFinance() {
-            await Promise.all([loadFinanceSummary(), loadPayments(), loadFinancePendingPayouts()]);
-        }
+    async function loadFinanceSummary() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/finance/summary', { headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) return;
+        const s = data.data || data;
+        document.getElementById('kpiRevenue').textContent = `₹ ${s.total_revenue||0}`;
+        document.getElementById('kpiRefunded').textContent = `₹ ${s.refunded_total||0}`;
+        document.getElementById('kpiPendingPayouts').textContent = `₹ ${s.pending_payouts_total||0}`;
+        document.getElementById('kpiCompletedPayouts').textContent = `₹ ${s.completed_payouts_total||0}`;
+    }
 
-        async function loadFinanceSummary() {
-            const token = localStorage.getItem('access_token');
-            const res = await fetch('/api/super_admin/finance/summary', { headers:{ 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (!data.success) return;
-            const s = data.data || data;
-            document.getElementById('kpiRevenue').textContent = `₹ ${s.total_revenue||0}`;
-            document.getElementById('kpiRefunded').textContent = `₹ ${s.refunded_total||0}`;
-            document.getElementById('kpiPendingPayouts').textContent = `₹ ${s.pending_payouts_total||0}`;
-            document.getElementById('kpiCompletedPayouts').textContent = `₹ ${s.completed_payouts_total||0}`;
-        }
+    async function loadPayments() {
+        const status = document.getElementById('filterPaymentStatus').value;
+        const ptype = document.getElementById('filterPaymentType').value;
+        const qs = new URLSearchParams();
+        if (status) qs.set('status', status);
+        if (ptype) qs.set('payment_type', ptype);
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/payments?' + qs.toString(), { headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('paymentsTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load payments'}</td></tr>`; return; }
+        tbody.innerHTML = (data.payments||[]).map(p => {
+            const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
+            const amt = (p.amount!=null) ? `₹ ${p.amount}` : '-';
+            const type = (p.payment_type||'').toUpperCase();
+            const status = (p.status||'-');
+            const canInvoice = (p.payment_type==='booking' && p.status==='completed' && !p.invoice_number);
+            const inv = p.invoice_number ? `<span class=\"badge bg-secondary\">${p.invoice_number}</span>` : '';
+            const btns = `<div class=\"btn-group btn-group-sm\">${canInvoice?`<button class=\"btn btn-outline-primary\" onclick=\"generateInvoice('${p.id}')\">Generate Invoice</button>`:''}</div>`;
+            return `<tr>
+                <td>${type}</td>
+                <td>${status}</td>
+                <td>${amt}</td>
+                <td>${dt}</td>
+                <td>${inv} ${btns}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" class="text-center text-muted">No payments found</td></tr>';
+    }
 
-        async function loadPayments() {
-            const status = document.getElementById('filterPaymentStatus').value;
-            const ptype = document.getElementById('filterPaymentType').value;
-            const qs = new URLSearchParams();
-            if (status) qs.set('status', status);
-            if (ptype) qs.set('payment_type', ptype);
-            const token = localStorage.getItem('access_token');
-            const res = await fetch('/api/super_admin/payments?' + qs.toString(), { headers:{ 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            const tbody = document.getElementById('paymentsTableBody');
-            if (!data.success) { tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load payments'}</td></tr>`; return; }
-            tbody.innerHTML = (data.payments||[]).map(p => {
-                const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
-                const amt = (p.amount!=null) ? `₹ ${p.amount}` : '-';
-                const type = (p.payment_type||'').toUpperCase();
-                const status = (p.status||'-');
-                const canInvoice = (p.payment_type==='booking' && p.status==='completed' && !p.invoice_number);
-                const inv = p.invoice_number ? `<span class=\"badge bg-secondary\">${p.invoice_number}</span>` : '';
-                const btns = `<div class=\"btn-group btn-group-sm\">${canInvoice?`<button class=\"btn btn-outline-primary\" onclick=\"generateInvoice('${p.id}')\">Generate Invoice</button>`:''}</div>`;
-                return `<tr>
-                    <td>${type}</td>
-                    <td>${status}</td>
-                    <td>${amt}</td>
-                    <td>${dt}</td>
-                    <td>${inv} ${btns}</td>
-                </tr>`;
-            }).join('') || '<tr><td colspan="5" class="text-center text-muted">No payments found</td></tr>';
-        }
+    async function generateInvoice(paymentId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/payments/${paymentId}/invoice`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadPayments();
+    }
 
-        async function generateInvoice(paymentId) {
-            const token = localStorage.getItem('access_token');
-            const res = await fetch(`/api/super_admin/payments/${paymentId}/invoice`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
-            loadPayments();
-        }
-
-        async function loadFinancePendingPayouts() {
-            const token = localStorage.getItem('access_token');
-            const res = await fetch('/api/super_admin/payouts/pending', { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            const tbody = document.getElementById('financePayoutsTableBody');
-            if (!data.success) { tbody.innerHTML = `<tr><td colspan="4" class="text-danger">${data.message||'Failed to load payouts'}</td></tr>`; return; }
-            const payouts = (data.payouts || []);
-            tbody.innerHTML = payouts.map(p => {
-                const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
-                const vname = (p.vendor && (p.vendor.name || (p.vendor.user_id))) || '-';
-                return `<tr>
-                    <td>${vname}</td>
-                    <td>₹ ${p.amount}</td>
-                    <td>${dt}</td>
-                    <td>
-                        <button class=\"btn btn-sm btn-success\" onclick=\"approvePayout('${p.id || p._id}')\">Approve</button>
-                    </td>
-                </tr>`;
-            }).join('') || '<tr><td colspan="4" class="text-center text-muted">No pending payouts</td></tr>';
-        }
+    async function loadFinancePendingPayouts() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/payouts/pending', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('financePayoutsTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="4" class="text-danger">${data.message||'Failed to load payouts'}</td></tr>`; return; }
+        const payouts = (data.payouts || []);
+        tbody.innerHTML = payouts.map(p => {
+            const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
+            const vname = (p.vendor && (p.vendor.name || (p.vendor.user_id))) || '-';
+            return `<tr>
+                <td>${vname}</td>
+                <td>₹ ${p.amount}</td>
+                <td>${dt}</td>
+                <td>
+                    <button class=\"btn btn-sm btn-success\" onclick=\"approvePayout('${p.id || p._id}')\">Approve</button>
+                </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="4" class="text-center text-muted">No pending payouts</td></tr>';
+    }
 
 
 
     async function loadUsers() {
-        const role = document.getElementById('filterUserRole').value;
-        const active = document.getElementById('filterUserActive').value;
-        const qs = new URLSearchParams();
-        if (role) qs.set('role', role);
-        if (active) qs.set('active', active);
-        const token = localStorage.getItem('access_token');
-        const res = await fetch('/api/super_admin/users?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await res.json();
-        const tbody = document.getElementById('usersTableBody');
-        if (!data.success) { tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load users'}</td></tr>`; return; }
-        tbody.innerHTML = (data.users||[]).map(u => {
-            const badge = u.active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
-            const btnLabel = u.active ? 'Deactivate' : 'Activate';
-            return `<tr>
-                <td>${u.name||'-'}</td>
-                <td>${u.email||'-'}</td>
-                <td>${(u.role||'').replaceAll('_',' ')}</td>
-                <td>${badge}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="toggleUserActive('${u.id}')">${btnLabel}</button>
-                </td>
-            </tr>`;
-        }).join('') || '<tr><td colspan="5" class="text-center text-muted">No users found</td></tr>';
+        try {
+            console.log('Loading users...');
+            const role = document.getElementById('filterUserRole')?.value || '';
+            const active = document.getElementById('filterUserActive')?.value || '';
+            const qs = new URLSearchParams();
+            if (role) qs.set('role', role);
+            if (active) qs.set('active', active);
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/super_admin/users?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) {
+                console.error('usersTableBody element not found');
+                return;
+            }
+            if (!data.success) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load users'}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = (data.users||[]).map(u => {
+                const badge = u.active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
+                const btnLabel = u.active ? 'Deactivate' : 'Activate';
+                return `<tr>
+                    <td>${u.name||'-'}</td>
+                    <td>${u.email||'-'}</td>
+                    <td>${(u.role||'').replaceAll('_',' ')}</td>
+                    <td>${badge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="toggleUserActive('${u.id}')">${btnLabel}</button>
+                    </td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="5" class="text-center text-muted">No users found</td></tr>';
+            console.log('Users loaded successfully');
+        } catch (error) {
+            console.error('Error loading users:', error);
+            const tbody = document.getElementById('usersTableBody');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading users: ${error.message}</td></tr>`;
+            }
+        }
     }
 
     async function toggleUserActive(userId) {
@@ -948,6 +1023,7 @@
                 <td>${btns}</td>
             </tr>`;
         }).join('') || '<tr><td colspan="6" class="text-center text-muted">No bookings found</td></tr>';
+    }
 
     async function confirmBooking(bookingId) {
         const token = localStorage.getItem('access_token');
