@@ -26,6 +26,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-white" href="#" data-section="vendor_verification" onclick="showSection('vendor_verification', event)">
+                            <i class="fas fa-id-card-alt me-2"></i>Vendor Verification
+                            <span id="verificationBadge" class="badge bg-danger ms-2 d-none">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-white" href="#" data-section="bookings" onclick="showSection('bookings', event)">
                             <i class="fas fa-calendar me-2"></i>Bookings
                         </a>
@@ -280,6 +286,39 @@
                                 </thead>
                                 <tbody id="payoutsTableBody">
                                     <tr><td colspan="4" class="text-center py-4 text-muted">Loading payouts...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendor Verification Section -->
+            <div id="vendor_verificationSection" class="dashboard-section d-none">
+                <h3 class="mb-3">
+                    <i class="fas fa-id-card-alt me-2"></i>Vendor Verification Requests
+                </h3>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Review and approve vendor verification documents
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Documents</th>
+                                        <th>Submitted At</th>
+                                        <th style="width: 200px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="verificationRequestsTableBody">
+                                    <tr><td colspan="6" class="text-center py-4 text-muted">Loading verification requests...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -720,6 +759,9 @@
         currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         document.getElementById('userName').textContent = currentUser.name || currentUser.email;
 
+        // Load verification requests to update badge
+        loadVendorVerificationRequests().catch(err => console.error('Failed to load verification requests:', err));
+
         // Setup profile form handler
         const profileForm = document.getElementById('profileForm');
         if (profileForm) {
@@ -780,6 +822,8 @@
             } else if (section === 'vendors') {
                 loadAdminVendors().catch(err => console.error('Failed to load vendors:', err));
                 loadPendingPayouts().catch(err => console.error('Failed to load payouts:', err));
+            } else if (section === 'vendor_verification') {
+                loadVendorVerificationRequests().catch(err => console.error('Failed to load verification requests:', err));
             } else if (section === 'bookings') {
                 loadAdminBookings().catch(err => console.error('Failed to load bookings:', err));
             } else if (section === 'services') {
@@ -1322,6 +1366,127 @@
         } catch (error) {
             console.error('Error updating profile:', error);
             alert('❌ Error updating profile. Please try again.');
+        }
+    }
+
+    async function loadVendorVerificationRequests() {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('/api/onboard_manager/vendor_verification_requests', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const requests = data.data || [];
+                const tbody = document.getElementById('verificationRequestsTableBody');
+
+                // Update badge count
+                const badge = document.getElementById('verificationBadge');
+                if (requests.length > 0) {
+                    badge.textContent = requests.length;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No pending verification requests</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                requests.forEach(req => {
+                    const vendor = req.vendor_info || {};
+                    const docs = req.documents || {};
+                    const submittedAt = new Date(req.created_at).toLocaleString();
+
+                    let docsHtml = '<div class="small">';
+                    if (docs.id_proof) docsHtml += '<a href="' + docs.id_proof + '" target="_blank" class="badge bg-info me-1">ID Proof</a>';
+                    if (docs.business_license) docsHtml += '<a href="' + docs.business_license + '" target="_blank" class="badge bg-info me-1">License</a>';
+                    if (docs.service_certification) docsHtml += '<a href="' + docs.service_certification + '" target="_blank" class="badge bg-info me-1">Certification</a>';
+                    docsHtml += '</div>';
+
+                    html += `
+                        <tr>
+                            <td><strong>${vendor.name || 'N/A'}</strong></td>
+                            <td>${vendor.email || 'N/A'}</td>
+                            <td>${vendor.phone || 'N/A'}</td>
+                            <td>${docsHtml}</td>
+                            <td class="small">${submittedAt}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success me-1" onclick="approveVendorVerification('${req.vendor_id}')">
+                                    <i class="fas fa-check me-1"></i>Approve
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectVendorVerification('${req.vendor_id}')">
+                                    <i class="fas fa-times me-1"></i>Reject
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading verification requests:', error);
+        }
+    }
+
+    async function approveVendorVerification(vendorId) {
+        if (!confirm('Are you sure you want to approve this vendor?')) return;
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/onboard_manager/vendors/${vendorId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ notes: 'Approved via verification dashboard' })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert('✅ Vendor approved successfully!');
+                await loadVendorVerificationRequests();
+            } else {
+                alert('❌ Failed to approve: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error approving vendor:', error);
+            alert('❌ Error approving vendor. Please try again.');
+        }
+    }
+
+    async function rejectVendorVerification(vendorId) {
+        const reason = prompt('Please enter rejection reason:');
+        if (!reason || reason.trim() === '') {
+            alert('Rejection reason is required');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/onboard_manager/vendors/${vendorId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason.trim() })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                alert('✅ Vendor rejected successfully!');
+                await loadVendorVerificationRequests();
+            } else {
+                alert('❌ Failed to reject: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error rejecting vendor:', error);
+            alert('❌ Error rejecting vendor. Please try again.');
         }
     }
 

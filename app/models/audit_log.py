@@ -20,6 +20,7 @@ class AuditLog:
     ACTION_LOGIN = 'login'
     ACTION_LOGOUT = 'logout'
     ACTION_SIGNATURE = 'signature'
+    ACTION_ESCALATION = 'escalation'
     ACTION_PAYMENT = 'payment'
     ACTION_STATUS_CHANGE = 'status_change'
     

@@ -88,6 +88,7 @@ def register_blueprints(app):
     from app.routes.super_admin import super_admin_bp
     from app.routes.common import common_bp
     from app.routes.chatbot import chatbot_bp
+    from app.routes.signature import signature_bp
 
     # Register blueprints with URL prefixes
     app.register_blueprint(views_bp)  # No prefix for root routes
@@ -99,6 +100,7 @@ def register_blueprints(app):
     app.register_blueprint(super_admin_bp, url_prefix='/api/super_admin')
     app.register_blueprint(common_bp, url_prefix='/api')
     app.register_blueprint(chatbot_bp, url_prefix='/api/chatbot')
+    app.register_blueprint(signature_bp, url_prefix='/api/signature')
 
 
 def register_error_handlers(app):
@@ -161,10 +163,11 @@ def register_socketio_events(app):
 
 def register_cli_commands(app):
     """Register custom CLI commands."""
-    
-    from app.cli import init_db, create_admin, seed_data
-    
+
+    from app.cli import init_db, create_admin, seed_data, monitor_signatures
+
     app.cli.add_command(init_db)
     app.cli.add_command(create_admin)
     app.cli.add_command(seed_data)
+    app.cli.add_command(monitor_signatures)
 

@@ -64,13 +64,19 @@ def register():
         # Create user
         user_id = User.create(data)
         
-        # If vendor, create vendor profile
+        # If vendor, create vendor profile with pending_verification status
         if data['role'] == User.ROLE_VENDOR:
             vendor_data = {
                 'user_id': user_id,
                 'name': data['name'],
+                'phone': data.get('phone'),
+                'email': data.get('email'),
                 'services': data.get('services', []),
-                'pincodes': [data.get('pincode')] if data.get('pincode') else []
+                'pincodes': [data.get('pincode')] if data.get('pincode') else [],
+                'onboarding_status': Vendor.STATUS_PENDING_VERIFICATION,
+                'is_approved': False,
+                'documents_verified': False,
+                'payouts_enabled': False
             }
             Vendor.create(vendor_data)
         

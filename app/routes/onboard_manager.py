@@ -10,9 +10,52 @@ from app.models.notification import Notification
 from app.models.audit_log import AuditLog
 from app.utils.decorators import onboard_manager_required
 from app.utils.error_handlers import api_error_response, api_success_response
-from app import socketio
+from app import socketio, mongo
 
 onboard_manager_bp = Blueprint('onboard_manager', __name__)
+
+
+@onboard_manager_bp.route('/vendor_verification_requests', methods=['GET'])
+@onboard_manager_required
+def get_verification_requests(user):
+    """Get all pending vendor verification requests."""
+    try:
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 20))
+        skip = (page - 1) * limit
+
+        # Get verification requests
+        requests_cursor = mongo.db['admin_verification_requests'].find(
+            {'status': 'pending'}
+        ).sort('created_at', -1).skip(skip).limit(limit)
+
+        requests_list = []
+        for req in requests_cursor:
+            # Get vendor details
+            vendor = Vendor.find_by_id(req['vendor_id'])
+            if vendor:
+                requests_list.append({
+                    'id': str(req['_id']),
+                    'vendor_id': req['vendor_id'],
+                    'vendor_name': req.get('vendor_name'),
+                    'request_type': req.get('request_type'),
+                    'status': req.get('status'),
+                    'documents': req.get('documents', []),
+                    'created_at': req.get('created_at'),
+                    'vendor_details': Vendor.to_dict(vendor)
+                })
+
+        total = mongo.db['admin_verification_requests'].count_documents({'status': 'pending'})
+
+        return api_success_response({
+            'requests': requests_list,
+            'total': total,
+            'page': page,
+            'pages': (total + limit - 1) // limit if total > 0 else 0
+        })
+
+    except Exception as e:
+        return api_error_response(f'Failed to get verification requests: {str(e)}', 500)
 
 
 @onboard_manager_bp.route('/vendors/pending', methods=['GET'])
@@ -89,16 +132,20 @@ def approve_vendor(user, vendor_id):
         if not vendor:
             return api_error_response('Vendor not found', 404)
         
-        if vendor['onboarding_status'] != Vendor.STATUS_PENDING:
+        if vendor['onboarding_status'] not in [Vendor.STATUS_PENDING, Vendor.STATUS_PENDING_VERIFICATION]:
             return api_error_response('Vendor is not pending approval', 400)
-        
+
         data = request.get_json() or {}
-        
-        # Update vendor status
+
+        # Update vendor status with new approval flags
         Vendor.update(vendor_id, {
-            'onboarding_status': Vendor.STATUS_APPROVED,
+            'onboarding_status': Vendor.STATUS_ACTIVE,
+            'is_approved': True,
+            'documents_verified': True,
+            'payouts_enabled': True,
             'approved_by': str(user['_id']),
-            'approval_notes': data.get('notes', '')
+            'approval_notes': data.get('notes', ''),
+            'rejection_reason': ''  # Clear any previous rejection reason
         })
         
         # Create notification for vendor
@@ -146,17 +193,20 @@ def reject_vendor(user, vendor_id):
         if not vendor:
             return api_error_response('Vendor not found', 404)
         
-        if vendor['onboarding_status'] != Vendor.STATUS_PENDING:
+        if vendor['onboarding_status'] not in [Vendor.STATUS_PENDING, Vendor.STATUS_PENDING_VERIFICATION]:
             return api_error_response('Vendor is not pending approval', 400)
-        
+
         data = request.get_json()
-        
+
         if not data or not data.get('reason'):
             return api_error_response('Rejection reason is required', 400)
-        
-        # Update vendor status
+
+        # Update vendor status with rejection flags
         Vendor.update(vendor_id, {
             'onboarding_status': Vendor.STATUS_REJECTED,
+            'is_approved': False,
+            'documents_verified': False,
+            'payouts_enabled': False,
             'rejected_by': str(user['_id']),
             'rejection_reason': data['reason']
         })

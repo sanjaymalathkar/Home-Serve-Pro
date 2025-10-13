@@ -58,7 +58,7 @@
             <!-- Overview Section -->
             <div id="overviewSection" class="dashboard-section">
                 <div class="row g-4 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card text-white bg-primary">
                             <div class="card-body">
                                 <h5 class="card-title">Total Bookings</h5>
@@ -66,7 +66,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card text-white bg-success">
                             <div class="card-body">
                                 <h5 class="card-title">Completed</h5>
@@ -74,7 +74,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card text-white bg-warning">
                             <div class="card-body">
                                 <h5 class="card-title">Pending</h5>
@@ -82,6 +82,21 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-danger">
+                            <div class="card-body">
+                                <h5 class="card-title">Pending Signatures</h5>
+                                <h2 id="pendingSignatures">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Required Alert -->
+                <div id="signatureAlert" class="alert alert-warning mt-3 d-none">
+                    <h5><i class="fas fa-signature"></i> Signature Required</h5>
+                    <p>You have completed services that require your signature approval. Please review and sign off on these services.</p>
+                    <button class="btn btn-warning" onclick="showSection('bookings')">Review & Sign</button>
                 </div>
 
                 <div class="card">
@@ -99,11 +114,42 @@
 
             <!-- Bookings Section -->
             <div id="bookingsSection" class="dashboard-section d-none">
-                <h3 class="mb-4">My Bookings</h3>
-                <div id="bookingsList">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                <!-- Signature Required Bookings -->
+                <div id="signatureRequiredSection" class="mb-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5><i class="fas fa-signature"></i> Signature Required</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="signatureRequiredList">
+                                <!-- Signature required bookings will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Bookings -->
+                <div class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-calendar-alt"></i> Upcoming Bookings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="upcomingBookingsList">
+                                <!-- Upcoming bookings will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Past Bookings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-history"></i> Past Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="pastBookingsList">
+                            <!-- Past bookings will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -112,6 +158,49 @@
             <!-- Services Section -->
             <div id="servicesSection" class="dashboard-section d-none">
                 <h3 class="mb-4">Available Services</h3>
+
+                <!-- Pincode-based Search -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-map-marker-alt"></i> Search Services by Location</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="searchPincode" class="form-label">Pincode</label>
+                                <input type="text" class="form-control" id="searchPincode" placeholder="Enter your pincode">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="serviceCategory" class="form-label">Category</label>
+                                <select class="form-select" id="serviceCategory">
+                                    <option value="">All Categories</option>
+                                    <option value="plumbing">Plumbing</option>
+                                    <option value="electrical">Electrical</option>
+                                    <option value="painting">Painting</option>
+                                    <option value="cleaning">Cleaning</option>
+                                    <option value="carpentry">Carpentry</option>
+                                    <option value="appliance_repair">Appliance Repair</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="searchRadius" class="form-label">Radius (km)</label>
+                                <select class="form-select" id="searchRadius">
+                                    <option value="5">5 km</option>
+                                    <option value="10" selected>10 km</option>
+                                    <option value="20">20 km</option>
+                                    <option value="50">50 km</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary w-100" onclick="searchServicesByPincode()">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="servicesList">
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary" role="status">
@@ -203,6 +292,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <!-- Vendor Info Section (hidden by default) -->
+                <div id="vendorBookingInfo" class="d-none mb-3"></div>
+
                 <form id="bookingForm">
                     <input type="hidden" id="bookingServiceId">
                     <input type="hidden" id="bookingServiceName">
@@ -270,7 +362,48 @@
     });
 
     async function loadDashboardData() {
-        await loadBookings();
+        try {
+            const token = localStorage.getItem('access_token');
+
+            // Load enhanced dashboard data
+            const dashboardResponse = await fetch('/api/customer/dashboard', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (dashboardResponse.ok) {
+                const dashboardData = await dashboardResponse.json();
+                const data = dashboardData.data;
+
+                // Update statistics
+                document.getElementById('totalBookings').textContent = data.statistics.total_bookings;
+                document.getElementById('completedBookings').textContent = data.statistics.completed_bookings;
+                document.getElementById('pendingBookings').textContent = data.statistics.pending_bookings;
+                document.getElementById('pendingSignatures').textContent = data.statistics.pending_signatures;
+
+                // Show signature alert if needed
+                const signatureAlert = document.getElementById('signatureAlert');
+                if (data.statistics.pending_signatures > 0) {
+                    signatureAlert.classList.remove('d-none');
+                } else {
+                    signatureAlert.classList.add('d-none');
+                }
+
+                // Display bookings
+                displaySignatureRequiredBookings(data.signature_required_bookings);
+                displayUpcomingBookings(data.upcoming_bookings);
+                displayPastBookings(data.past_bookings);
+
+                // Update profile form
+                updateProfileForm(data.profile);
+            }
+
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+            // Fallback to old method
+            await loadBookings();
+        }
     }
 
     async function loadBookings() {
@@ -352,6 +485,138 @@
                     Unable to load bookings. Please try again later.
                 </div>
             `;
+        }
+    }
+
+    function displaySignatureRequiredBookings(bookings) {
+        const container = document.getElementById('signatureRequiredList');
+        const section = document.getElementById('signatureRequiredSection');
+
+        if (!bookings || bookings.length === 0) {
+            section.classList.add('d-none');
+            return;
+        }
+
+        section.classList.remove('d-none');
+
+        let html = '';
+        bookings.forEach(booking => {
+            const serviceDate = new Date(booking.service_date || booking.created_at).toLocaleDateString();
+            html += `
+                <div class="card mb-3 border-warning">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="card-title">${booking.service_info?.name || 'Service'}</h6>
+                                <p class="card-text mb-1">
+                                    <strong>Vendor:</strong> ${booking.vendor_info?.name || 'Unknown'}<br>
+                                    <strong>Date:</strong> ${serviceDate}<br>
+                                    <strong>Status:</strong> <span class="badge bg-success">Completed</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-warning" onclick="openSignatureModal(${JSON.stringify(booking).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-signature"></i> Sign Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function displayUpcomingBookings(bookings) {
+        const container = document.getElementById('upcomingBookingsList');
+
+        if (!bookings || bookings.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No upcoming bookings</div>';
+            return;
+        }
+
+        let html = '';
+        bookings.forEach(booking => {
+            const serviceDate = new Date(booking.service_date || booking.created_at).toLocaleDateString();
+            const statusBadge = getStatusBadge(booking.status);
+
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="card-title">${booking.service_info?.name || 'Service'}</h6>
+                                <p class="card-text mb-1">
+                                    <strong>Vendor:</strong> ${booking.vendor_info?.name || 'Pending Assignment'}<br>
+                                    <strong>Date:</strong> ${serviceDate}<br>
+                                    <strong>Address:</strong> ${booking.address || 'N/A'}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                ${statusBadge}
+                                <p class="text-muted small mt-2">₹${booking.service_info?.base_price || 0}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function displayPastBookings(bookings) {
+        const container = document.getElementById('pastBookingsList');
+
+        if (!bookings || bookings.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No past bookings</div>';
+            return;
+        }
+
+        let html = '';
+        bookings.forEach(booking => {
+            const serviceDate = new Date(booking.service_date || booking.created_at).toLocaleDateString();
+            const statusBadge = getStatusBadge(booking.status);
+
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6 class="card-title">${booking.service_info?.name || 'Service'}</h6>
+                                <p class="card-text mb-1">
+                                    <strong>Vendor:</strong> ${booking.vendor_info?.name || 'Unknown'}<br>
+                                    <strong>Date:</strong> ${serviceDate}<br>
+                                    <strong>Payment:</strong> <span class="badge ${booking.payment_status === 'completed' ? 'bg-success' : 'bg-warning'}">${booking.payment_status}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                ${statusBadge}
+                                ${booking.signature_status === 'signed' ? '<p class="text-success small mt-2"><i class="fas fa-check-circle"></i> Signed</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function updateProfileForm(profile) {
+        if (!profile) return;
+
+        document.getElementById('profileName').value = profile.name || '';
+        document.getElementById('profileEmail').value = profile.email || '';
+        document.getElementById('profilePhone').value = profile.phone || '';
+        document.getElementById('profileAddress').value = profile.address || '';
+        document.getElementById('profilePincode').value = profile.pincode || '';
+
+        // Auto-populate pincode search if available
+        const searchPincode = document.getElementById('searchPincode');
+        if (searchPincode && profile.pincode && !searchPincode.value) {
+            searchPincode.value = profile.pincode;
         }
     }
 
@@ -490,7 +755,9 @@
         }
     }
 
-    function bookService(serviceId, serviceName) {
+    function bookService(serviceId, serviceName, isVendorSpecific = false) {
+        console.log('Booking service:', serviceId, serviceName, 'Vendor specific:', isVendorSpecific);
+
         // Populate modal with service info
         document.getElementById('bookingServiceId').value = serviceId;
         document.getElementById('bookingServiceName').value = serviceName;
@@ -511,6 +778,40 @@
 
         // Set default time to 10:00 AM
         document.getElementById('bookingTime').value = '10:00';
+
+        // Update modal title and button text based on booking type
+        const modalTitle = document.querySelector('#bookingModal .modal-title');
+        const submitButton = document.getElementById('bookingBtnText');
+
+        if (isVendorSpecific && window.selectedVendorId) {
+            modalTitle.textContent = `Book Service with Selected Vendor`;
+            submitButton.textContent = 'Confirm Booking with Vendor';
+
+            // Add vendor info to modal if available
+            const vendorInfo = document.getElementById('vendorBookingInfo');
+            if (vendorInfo) {
+                vendorInfo.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-user-tie me-2"></i>
+                        You are booking directly with a selected vendor.
+                    </div>
+                `;
+                vendorInfo.classList.remove('d-none');
+            }
+        } else {
+            modalTitle.textContent = 'Book Service';
+            submitButton.textContent = 'Confirm Booking';
+
+            // Hide vendor info
+            const vendorInfo = document.getElementById('vendorBookingInfo');
+            if (vendorInfo) {
+                vendorInfo.classList.add('d-none');
+            }
+
+            // Clear vendor selection
+            window.selectedVendorId = null;
+            window.selectedVendorServiceType = null;
+        }
 
         // Show modal
         const modal = new bootstrap.Modal(document.getElementById('bookingModal'));
@@ -537,42 +838,91 @@
         btnText.classList.add('d-none');
         btnSpinner.classList.remove('d-none');
 
+        // Check if this is a vendor-specific booking
+        const isVendorSpecific = window.selectedVendorId ? true : false;
+        const vendorId = window.selectedVendorId;
+
+        console.log('Submitting booking:', {
+            serviceId,
+            vendorId,
+            isVendorSpecific,
+            pincode,
+            serviceDate,
+            serviceTime
+        });
+
         try {
             const token = localStorage.getItem('access_token');
-            const response = await fetch('/api/customer/bookings', {
+
+            // Choose endpoint based on booking type
+            const endpoint = isVendorSpecific ?
+                '/api/customer/bookings/with-vendor' :
+                '/api/customer/bookings';
+
+            // Build request body
+            const requestBody = {
+                service_id: serviceId,
+                service_date: serviceDate,
+                service_time: serviceTime,
+                address: address,
+                pincode: pincode,
+                description: description
+            };
+
+            // Add vendor_id for vendor-specific bookings
+            if (isVendorSpecific && vendorId) {
+                requestBody.vendor_id = vendorId;
+            }
+
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    service_id: serviceId,
-                    service_date: serviceDate,
-                    service_time: serviceTime,
-                    address: address,
-                    pincode: pincode,
-                    description: description
-                })
+                body: JSON.stringify(requestBody)
             });
 
             const data = await response.json();
+            console.log('Booking response:', data);
 
             if (data.success) {
                 // Hide modal
                 bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
 
-                // Show success message
-                alert('✅ Booking created successfully!\n\nYour booking has been submitted and a vendor will be assigned soon.');
+                // Show success message based on booking type
+                let successMessage = '✅ Booking created successfully!\n\n';
+                if (data.data?.vendor_assigned || data.data?.direct_booking) {
+                    successMessage += `Vendor "${data.data.vendor_name}" has been assigned and notified.`;
+                } else {
+                    successMessage += 'We will assign a vendor and notify you soon.';
+                }
+
+                alert(successMessage);
+
+                // Clear vendor selection
+                window.selectedVendorId = null;
+                window.selectedVendorServiceType = null;
 
                 // Refresh bookings and switch to bookings section
                 await loadBookings();
                 showSection('bookings');
             } else {
-                alert('❌ Failed to create booking:\n\n' + (data.message || 'Unknown error'));
+                // Show detailed error message
+                const errorMessage = data.message || 'Unknown error occurred';
+                alert(`❌ Failed to create booking:\n\n${errorMessage}\n\nPlease check your details and try again.`);
             }
         } catch (error) {
             console.error('Error creating booking:', error);
-            alert('❌ Error creating booking:\n\n' + error.message + '\n\nPlease try again.');
+            let errorMessage = 'Network error occurred. Please check your connection and try again.';
+
+            if (error.message.includes('404')) {
+                errorMessage = 'Service or vendor not found. Please refresh the page and try again.';
+            } else if (error.message.includes('400')) {
+                errorMessage = 'Invalid booking details. Please check your information and try again.';
+            }
+
+            alert(`❌ Error creating booking:\n\n${errorMessage}`);
         } finally {
             // Hide loading
             btnText.classList.remove('d-none');
@@ -608,74 +958,192 @@
     async function loadVendors() {
         const list = document.getElementById('vendorsList');
         list.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">Loading vendors...</p></div>';
+
         try {
             const serviceId = document.getElementById('vendorServiceSelect').value;
             const pincode = document.getElementById('vendorPincode').value.trim();
+
+            // Build query parameters
             const params = new URLSearchParams();
             if (serviceId) params.set('service_id', serviceId);
             if (pincode) params.set('pincode', pincode);
             params.set('availability', 'true');
-            const resp = await fetch('/api/vendors?' + params.toString());
-            const data = await resp.json();
-            if (data.success) {
-                renderVendors(data.data || []);
-            } else {
-                list.innerHTML = '<div class="alert alert-warning">Failed to load vendors.</div>';
+            params.set('limit', '20'); // Limit to 20 vendors for better performance
+
+            console.log('Loading vendors with params:', params.toString());
+
+            const response = await fetch('/api/vendors?' + params.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-        } catch (e) {
-            console.error('Failed to load vendors', e);
-            list.innerHTML = '<div class="alert alert-danger">Error loading vendors.</div>';
+
+            const data = await response.json();
+            console.log('Vendors API response:', data);
+
+            if (data.success) {
+                const vendors = data.data?.vendors || [];
+                renderVendors(vendors, data.data?.filters_applied);
+            } else {
+                list.innerHTML = `<div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ${data.message || 'Failed to load vendors'}
+                </div>`;
+            }
+        } catch (error) {
+            console.error('Error loading vendors:', error);
+            list.innerHTML = `<div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error loading vendors: ${error.message}
+                <br><small class="text-muted">Please check your connection and try again.</small>
+            </div>`;
         }
     }
 
-    function renderVendors(vendors) {
+    function renderVendors(vendors, filtersApplied = {}) {
         const list = document.getElementById('vendorsList');
+
         if (!vendors || vendors.length === 0) {
-            list.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No vendors found for your filters.</div>';
+            const filterInfo = filtersApplied ?
+                `<br><small class="text-muted">Filters: ${Object.entries(filtersApplied)
+                    .filter(([key, value]) => value && value !== 'false')
+                    .map(([key, value]) => `${key}: ${value}`)
+                    .join(', ') || 'None'}</small>` : '';
+
+            list.innerHTML = `<div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No vendors found for your search criteria.
+                ${filterInfo}
+                <br><br>
+                <small>Try adjusting your filters or search in a different pincode.</small>
+            </div>`;
             return;
         }
-        let html = '<div class="row g-3">';
-        vendors.forEach(v => {
-            const rating = (v.ratings || 0).toFixed(1);
-            const services = (v.services || []).slice(0, 3).map(s => `<span class=\"badge bg-light text-dark me-1 mb-1\">${s}</span>`).join(' ');
+
+        // Show results summary
+        const totalVendors = filtersApplied?.total || vendors.length;
+        const summaryHtml = `<div class="mb-3">
+            <h6 class="text-muted">
+                <i class="fas fa-users me-2"></i>
+                Found ${totalVendors} vendor${totalVendors !== 1 ? 's' : ''}
+                ${filtersApplied?.pincode ? ` in ${filtersApplied.pincode}` : ''}
+                ${filtersApplied?.service_type ? ` for ${filtersApplied.service_type}` : ''}
+            </h6>
+        </div>`;
+
+        let html = summaryHtml + '<div class="row g-3">';
+
+        vendors.forEach(vendor => {
+            const rating = parseFloat(vendor.ratings || 0).toFixed(1);
+            const totalRatings = vendor.total_ratings || 0;
+            const completedJobs = vendor.completed_jobs || 0;
+            const isAvailable = vendor.availability_status === 'Available';
+
+            // Format services with badges
+            const services = (vendor.services || []).slice(0, 3)
+                .map(service => `<span class="badge bg-light text-dark me-1 mb-1">${service}</span>`)
+                .join(' ');
+
+            // Format pincodes
+            const pincodes = (vendor.pincode || []).slice(0, 3)
+                .map(code => `<span class="badge bg-secondary me-1">${code}</span>`)
+                .join(' ');
+
             html += `
             <div class="col-md-6 col-lg-4">
-              <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                  <div class="d-flex align-items-center mb-2">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width:40px;height:40px;">
-                      <i class="fas fa-user-tie"></i>
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <!-- Vendor Header -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                                 style="width:50px;height:50px;font-size:1.2rem;">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1 fw-bold">${vendor.name || 'Professional Vendor'}</h5>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-star text-warning me-1"></i>
+                                    <span class="fw-semibold">${rating}</span>
+                                    <small class="text-muted ms-1">(${totalRatings} reviews)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Type -->
+                        <div class="mb-2">
+                            <small class="text-muted fw-semibold">SPECIALIZES IN</small>
+                            <div class="mt-1">${vendor.service_type || 'General Services'}</div>
+                        </div>
+
+                        <!-- Services -->
+                        <div class="mb-2">
+                            <small class="text-muted fw-semibold">SERVICES</small>
+                            <div class="mt-1">
+                                ${services || '<small class="text-muted">Services not specified</small>'}
+                            </div>
+                        </div>
+
+                        <!-- Service Areas -->
+                        ${pincodes ? `<div class="mb-3">
+                            <small class="text-muted fw-semibold">SERVICE AREAS</small>
+                            <div class="mt-1">${pincodes}</div>
+                        </div>` : ''}
+
+                        <!-- Stats -->
+                        <div class="mb-3">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="fw-bold text-primary">${completedJobs}</div>
+                                    <small class="text-muted">Jobs Done</small>
+                                </div>
+                                <div class="col-6">
+                                    <span class="badge ${isAvailable ? 'bg-success' : 'bg-secondary'} fs-6">
+                                        ${vendor.availability_status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <button class="btn ${isAvailable ? 'btn-primary' : 'btn-outline-secondary'} w-100"
+                                onclick="openBookingForVendor('${vendor.vendor_id}', '${vendor.service_type || ''}')"
+                                ${!isAvailable ? 'disabled' : ''}>
+                            <i class="fas fa-calendar-plus me-2"></i>
+                            ${isAvailable ? 'Book Now' : 'Currently Unavailable'}
+                        </button>
                     </div>
-                    <div>
-                      <h5 class="mb-0">${v.name || 'Vendor'}</h5>
-                      <small class="text-muted"><i class="fas fa-star text-warning"></i> ${rating} (${v.total_ratings || 0})</small>
-                    </div>
-                  </div>
-                  <div class="mb-2">${services || '<small class="text-muted">No services listed</small>'}</div>
-                  <div class="d-flex justify-content-between align-items-center mt-2">
-                    <span class="badge ${v.availability ? 'bg-success' : 'bg-secondary'}">${v.availability ? 'Available' : 'Offline'}</span>
-                    <button class="btn btn-sm btn-outline-primary" onclick="openBookingForVendor('${v.id}', '${(v.services && v.services[0]) || ''}')">
-                      <i class="fas fa-calendar-plus me-1"></i>Book
-                    </button>
-                  </div>
                 </div>
-              </div>
             </div>`;
         });
+
         html += '</div>';
         list.innerHTML = html;
     }
 
-    function openBookingForVendor(vendorId, serviceNameGuess) {
-        const sel = document.getElementById('vendorServiceSelect');
-        const selectedOption = sel.options[sel.selectedIndex];
+    function openBookingForVendor(vendorId, serviceType) {
+        console.log('Opening booking for vendor:', vendorId, 'Service type:', serviceType);
+
+        const serviceSelect = document.getElementById('vendorServiceSelect');
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
         const serviceId = selectedOption && selectedOption.value ? selectedOption.value : '';
-        const serviceName = selectedOption && selectedOption.text ? selectedOption.text : (serviceNameGuess || 'Service');
+        const serviceName = selectedOption && selectedOption.text ? selectedOption.text : '';
+
         if (!serviceId) {
-            alert('Please select a service first.');
+            alert('Please select a service first from the dropdown above.');
             return;
         }
-        bookService(serviceId, serviceName);
+
+        // Store vendor ID for the booking
+        window.selectedVendorId = vendorId;
+        window.selectedVendorServiceType = serviceType;
+
+        // Open booking modal with pre-selected service
+        bookService(serviceId, serviceName, true); // true indicates vendor-specific booking
     }
 
 
@@ -754,6 +1222,424 @@
         background-color: #e9ecef;
         color: #0d6efd;
     }
+
+    /* Signature Modal Styles */
+    .photo-gallery img {
+        max-width: 100%;
+        height: 150px;
+        object-fit: cover;
+        margin: 5px;
+        border-radius: 5px;
+    }
+
+    .rating-stars {
+        font-size: 2rem;
+        color: #ddd;
+    }
+
+    .rating-stars .star {
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .rating-stars .star:hover,
+    .rating-stars .star.active {
+        color: #ffc107;
+    }
+
+    .signature-pad-container {
+        text-align: center;
+    }
+
+    #signaturePad {
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #fff;
+    }
 </style>
+
+<!-- Signature Modal -->
+<div class="modal fade" id="signatureModal" tabindex="-1" aria-labelledby="signatureModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signatureModalLabel">
+                    <i class="fas fa-signature"></i> Service Signature Approval
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Service Details -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6>Service Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Service:</strong> <span id="signatureServiceName"></span></p>
+                                <p><strong>Vendor:</strong> <span id="signatureVendorName"></span></p>
+                                <p><strong>Date:</strong> <span id="signatureServiceDate"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> <span id="signatureServiceStatus"></span></p>
+                                <p><strong>Payment:</strong> <span id="signaturePaymentStatus"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Before/After Photos -->
+                <div class="card mb-3" id="signaturePhotosSection">
+                    <div class="card-header">
+                        <h6>Before & After Photos</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Before</h6>
+                                <div id="signatureBeforePhotos" class="photo-gallery">
+                                    <!-- Before photos will be loaded here -->
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>After</h6>
+                                <div id="signatureAfterPhotos" class="photo-gallery">
+                                    <!-- After photos will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Satisfaction Rating -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6>Rate Your Experience</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="rating-stars mb-3">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <textarea class="form-control" id="signatureFeedback" rows="3" placeholder="Optional feedback about the service..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Confirmation Text -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6>Confirmation</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="signatureConfirmation" required>
+                            <label class="form-check-label" for="signatureConfirmation">
+                                I confirm the service met my expectations
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signature Pad -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6>Digital Signature</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Please sign below to approve the completed service:</p>
+                        <div class="signature-pad-container">
+                            <canvas id="signaturePad" width="600" height="200" style="border: 1px solid #ccc; width: 100%; max-width: 600px;"></canvas>
+                        </div>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="submitSignature()" id="submitSignatureBtn">
+                    <i class="fas fa-check"></i> Submit Signature
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Signature Pad Library -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+<script>
+    // Signature functionality
+    let signaturePad = null;
+    let currentSignatureBooking = null;
+    let selectedRating = 0;
+
+    function initializeSignaturePad() {
+        const canvas = document.getElementById('signaturePad');
+        if (canvas && typeof SignaturePad !== 'undefined') {
+            signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+        }
+    }
+
+    function initializeRatingStars() {
+        const stars = document.querySelectorAll('.rating-stars .star');
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                updateStarDisplay();
+            });
+
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.dataset.rating);
+                highlightStars(rating);
+            });
+        });
+
+        const ratingContainer = document.querySelector('.rating-stars');
+        if (ratingContainer) {
+            ratingContainer.addEventListener('mouseleave', function() {
+                updateStarDisplay();
+            });
+        }
+    }
+
+    function highlightStars(rating) {
+        const stars = document.querySelectorAll('.rating-stars .star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    function updateStarDisplay() {
+        highlightStars(selectedRating);
+    }
+
+    function clearSignature() {
+        if (signaturePad) {
+            signaturePad.clear();
+        }
+    }
+
+    function openSignatureModal(booking) {
+        currentSignatureBooking = booking;
+
+        // Populate service details
+        document.getElementById('signatureServiceName').textContent = booking.service_info?.name || 'Unknown Service';
+        document.getElementById('signatureVendorName').textContent = booking.vendor_info?.name || 'Unknown Vendor';
+        document.getElementById('signatureServiceDate').textContent = new Date(booking.service_date).toLocaleDateString();
+        document.getElementById('signatureServiceStatus').textContent = booking.status;
+        document.getElementById('signaturePaymentStatus').textContent = booking.payment_status;
+
+        // Populate photos
+        populatePhotos('signatureBeforePhotos', booking.before_photos || []);
+        populatePhotos('signatureAfterPhotos', booking.after_photos || []);
+
+        // Reset form
+        selectedRating = 0;
+        updateStarDisplay();
+        document.getElementById('signatureFeedback').value = '';
+        document.getElementById('signatureConfirmation').checked = false;
+        clearSignature();
+
+        // Initialize signature pad if not already done
+        setTimeout(() => {
+            if (!signaturePad) {
+                initializeSignaturePad();
+            }
+        }, 100);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('signatureModal'));
+        modal.show();
+    }
+
+    function populatePhotos(containerId, photos) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (photos.length === 0) {
+            container.innerHTML = '<p class="text-muted">No photos available</p>';
+            return;
+        }
+
+        container.innerHTML = photos.map(photo =>
+            `<img src="${photo}" alt="Service photo" class="img-thumbnail" style="max-width: 150px; margin: 5px;">`
+        ).join('');
+    }
+
+    async function submitSignature() {
+        try {
+            // Validate form
+            if (!document.getElementById('signatureConfirmation').checked) {
+                alert('Please confirm that the service met your expectations');
+                return;
+            }
+
+            if (!signaturePad || signaturePad.isEmpty()) {
+                alert('Please provide your signature');
+                return;
+            }
+
+            // Get signature data
+            const signatureData = signaturePad.toDataURL();
+
+            // Prepare submission data
+            const submissionData = {
+                booking_id: currentSignatureBooking._id,
+                signature_data: signatureData,
+                satisfaction_rating: selectedRating,
+                feedback: document.getElementById('signatureFeedback').value,
+                confirmation_text: 'I confirm the service met my expectations'
+            };
+
+            // Submit signature
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('/api/signature/job/signature_submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(submissionData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('signatureModal'));
+                modal.hide();
+
+                // Show success message
+                alert('Signature submitted successfully! Thank you for your feedback.');
+
+                // Reload dashboard data
+                await loadDashboardData();
+            } else {
+                alert(result.message || 'Failed to submit signature');
+            }
+
+        } catch (error) {
+            console.error('Error submitting signature:', error);
+            alert('Failed to submit signature. Please try again.');
+        }
+    }
+
+    async function searchServicesByPincode() {
+        try {
+            const pincode = document.getElementById('searchPincode').value;
+            const category = document.getElementById('serviceCategory').value;
+            const radius = document.getElementById('searchRadius').value;
+
+            if (!pincode) {
+                alert('Please enter a pincode');
+                return;
+            }
+
+            const token = localStorage.getItem('access_token');
+            const params = new URLSearchParams({
+                pincode: pincode,
+                radius: radius
+            });
+
+            if (category) {
+                params.append('service_category', category);
+            }
+
+            const response = await fetch(`/api/customer/search_by_pincode?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                displayPincodeServices(result.data);
+            } else {
+                alert(result.message || 'Failed to search services');
+            }
+
+        } catch (error) {
+            console.error('Error searching services:', error);
+            alert('Failed to search services. Please try again.');
+        }
+    }
+
+    function displayPincodeServices(data) {
+        const container = document.getElementById('servicesList');
+        const services = data.services || [];
+
+        if (services.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No services found in your area. Try increasing the search radius.</div>';
+            return;
+        }
+
+        let html = `
+            <div class="alert alert-info">
+                Found ${services.length} services in your area.
+                ${data.demand_multiplier > 1 ? `<strong>High demand area - ${((data.demand_multiplier - 1) * 100).toFixed(0)}% price adjustment</strong>` : ''}
+            </div>
+        `;
+
+        services.forEach(service => {
+            html += `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">${service.name}</h5>
+                                <p class="card-text">${service.description || ''}</p>
+                                <p class="text-muted">
+                                    <i class="fas fa-users"></i> ${service.available_vendors} vendors available
+                                    ${service.demand_level === 'high' ? '<span class="badge bg-warning ms-2">High Demand</span>' : ''}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="price-info">
+                                    ${service.base_price !== service.dynamic_price ?
+                                        `<span class="text-muted text-decoration-line-through">₹${service.base_price}</span><br>` : ''}
+                                    <span class="h5 text-primary">₹${service.dynamic_price}</span>
+                                </div>
+                                <button class="btn btn-primary mt-2" onclick="bookService('${service._id}', '${service.name}')">
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    // Initialize signature components when modal is shown
+    document.getElementById('signatureModal').addEventListener('shown.bs.modal', function() {
+        if (!signaturePad) {
+            initializeSignaturePad();
+        }
+        if (document.querySelectorAll('.rating-stars .star').length > 0 && selectedRating === 0) {
+            initializeRatingStars();
+        }
+    });
+</script>
 {% endblock %}
 

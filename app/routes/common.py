@@ -55,70 +55,156 @@ def get_public_services():
 
 @common_bp.route('/vendors', methods=['GET'])
 def get_public_vendors():
-    """Get approved, registered vendors (public endpoint).
-    Optional query params:
-      - service_id: filter by service id
-      - service: filter by service name
-      - pincode: filter by serviceable pincode
-      - availability: 'true' to return only currently available vendors
+    """
+    Get approved, registered vendors (public endpoint).
+
+    Query Parameters:
+        - service_id: Filter by service ID
+        - service_type: Filter by service category/type
+        - pincode: Filter by serviceable pincode
+        - availability: 'true' to return only currently available vendors
+        - limit: Maximum number of vendors to return (default: 50)
+
+    Returns:
+        {
+            "success": true,
+            "data": [
+                {
+                    "vendor_id": "unique_id",
+                    "name": "Vendor Name",
+                    "service_type": "Cleaning / Electrical / Plumbing etc.",
+                    "services": ["Service 1", "Service 2"],
+                    "pincode": ["12345", "12346"],
+                    "availability_status": "Available / Busy",
+                    "ratings": 4.5,
+                    "total_ratings": 120,
+                    "completed_jobs": 85,
+                    "profile_image": "url_to_image"
+                }
+            ],
+            "total": 10,
+            "filters_applied": {...}
+        }
     """
     try:
         from app.models.vendor import Vendor
-        # Resolve filters
+
+        # Parse query parameters
         service_id = request.args.get('service_id', '').strip()
-        service_name = request.args.get('service', '').strip()
+        service_type = request.args.get('service_type', '').strip()
         pincode = request.args.get('pincode', '').strip()
         availability_only = request.args.get('availability', 'false').lower() == 'true'
+        limit = min(int(request.args.get('limit', 50)), 100)  # Max 100 vendors
 
-        # If service_id is provided, resolve to name
-        if service_id and not service_name:
-            svc = Service.find_by_id(service_id)
-            if svc:
-                service_name = svc.get('name', '')
+        # Resolve service_id to service name if provided
+        service_name = None
+        if service_id:
+            service = Service.find_by_id(service_id)
+            if service:
+                service_name = service.get('name', '')
+                if not service_type:
+                    service_type = service.get('category', '')
 
-        # Build base filters: only approved vendors with linked user
-        filters = { 'onboarding_status': 'approved' }
+        # Build vendor filters
+        filters = {
+            'onboarding_status': Vendor.STATUS_APPROVED  # Only approved vendors
+        }
+
         if availability_only:
             filters['availability'] = True
+
         if service_name:
-            filters['services'] = service_name
+            filters['services'] = {'$in': [service_name]}
+
+        if service_type:
+            # Filter by service category - check if any service in vendor's services matches the category
+            category_services = list(Service.find_all({'category': service_type, 'active': True}))
+            if category_services:
+                service_names = [s.get('name') for s in category_services]
+                filters['services'] = {'$in': service_names}
+
         if pincode:
-            filters['pincodes'] = pincode
+            filters['pincodes'] = {'$in': [pincode]}
 
-        vendors = Vendor.find_all(filters, skip=0, limit=100)
+        # Fetch vendors from database
+        vendors = list(Vendor.find_all(filters, skip=0, limit=limit))
 
-        # Keep only vendors that have a valid user account
+        # Process and validate vendors
         result = []
-        for v in vendors:
-            user = None
+        for vendor in vendors:
             try:
-                if v.get('user_id'):
-                    user = User.find_by_id(str(v['user_id']))
-            except Exception:
+                # Verify vendor has valid user account
                 user = None
-            if not user or user.get('role') != 'vendor':
-                continue
-            v_dict = Vendor.to_dict(v)
-            # Prefer vendor.name; fallback to user.name
-            if not v_dict.get('name'):
-                v_dict['name'] = user.get('name') or user.get('email')
-            # Expose minimal public fields
-            public = {
-                'id': v_dict['id'],
-                'name': v_dict.get('name'),
-                'services': v_dict.get('services', []),
-                'pincodes': v_dict.get('pincodes', []),
-                'availability': v_dict.get('availability', False),
-                'ratings': v_dict.get('ratings', 0.0),
-                'total_ratings': v_dict.get('total_ratings', 0),
-                'completed_jobs': v_dict.get('completed_jobs', 0),
-                'profile_image': v_dict.get('profile_image')
-            }
-            result.append(public)
+                if vendor.get('user_id'):
+                    user = User.find_by_id(str(vendor['user_id']))
 
-        return api_success_response(result)
+                if not user or user.get('role') != User.ROLE_VENDOR:
+                    continue  # Skip vendors without valid user accounts
+
+                # Convert to dict and enhance with user data
+                vendor_dict = Vendor.to_dict(vendor)
+
+                # Use vendor name, fallback to user name/email
+                vendor_name = vendor_dict.get('name') or user.get('name') or user.get('email', 'Unknown Vendor')
+
+                # Determine primary service type
+                vendor_services = vendor_dict.get('services', [])
+                primary_service_type = 'General'
+                if vendor_services:
+                    # Get the category of the first service
+                    first_service = Service.find_by_name(vendor_services[0])
+                    if first_service:
+                        primary_service_type = first_service.get('category', 'General').title()
+
+                # Build public vendor data
+                public_vendor = {
+                    'vendor_id': vendor_dict['id'],
+                    'name': vendor_name,
+                    'service_type': primary_service_type,
+                    'services': vendor_services,
+                    'pincode': vendor_dict.get('pincodes', []),
+                    'availability_status': 'Available' if vendor_dict.get('availability') else 'Busy',
+                    'ratings': round(vendor_dict.get('ratings', 0.0), 1),
+                    'total_ratings': vendor_dict.get('total_ratings', 0),
+                    'completed_jobs': vendor_dict.get('completed_jobs', 0),
+                    'profile_image': vendor_dict.get('profile_image'),
+                    'phone': user.get('phone', ''),  # Include contact info for booking
+                    'created_at': vendor_dict.get('created_at')
+                }
+
+                result.append(public_vendor)
+
+            except Exception as vendor_error:
+                print(f"Error processing vendor {vendor.get('_id')}: {vendor_error}")
+                continue
+
+        # Sort vendors by rating and availability
+        result.sort(key=lambda x: (
+            1 if x['availability_status'] == 'Available' else 0,
+            x['ratings'],
+            x['completed_jobs']
+        ), reverse=True)
+
+        # Build response with metadata
+        response_data = {
+            'vendors': result,
+            'total': len(result),
+            'filters_applied': {
+                'service_id': service_id,
+                'service_type': service_type,
+                'pincode': pincode,
+                'availability_only': availability_only,
+                'limit': limit
+            }
+        }
+
+        return api_success_response(response_data)
+
+    except ValueError as ve:
+        return api_error_response(f'Invalid parameter: {str(ve)}', 400)
     except Exception as e:
-        return api_error_response(f'Failed to get vendors: {str(e)}', 500)
+        print(f"Error in get_public_vendors: {str(e)}")
+        return api_error_response('Failed to fetch vendors. Please try again later.', 500)
 
 @common_bp.route('/profile', methods=['GET'])
 @jwt_required()

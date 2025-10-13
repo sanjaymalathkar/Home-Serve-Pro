@@ -55,7 +55,12 @@ class Booking:
         data.setdefault('status', Booking.STATUS_PENDING)
         data.setdefault('before_photos', [])
         data.setdefault('after_photos', [])
-        data.setdefault('signature_status', 'unsigned')
+        data.setdefault('signature_status', 'unsigned')  # unsigned, requested, signed, expired
+        data.setdefault('signature_hash', None)
+        data.setdefault('signature_requested_at', None)
+        data.setdefault('signature_submitted_at', None)
+        data.setdefault('signature_timeout_at', None)
+        data.setdefault('signature_escalated', False)
         data.setdefault('payment_status', 'pending')
         data.setdefault('created_at', datetime.utcnow())
         data.setdefault('updated_at', datetime.utcnow())
@@ -186,12 +191,76 @@ class Booking:
         """Get bookings with pending signatures older than specified days."""
         from datetime import timedelta
         cutoff_date = datetime.utcnow() - timedelta(days=days)
-        
+
         return list(
             mongo.db[Booking.COLLECTION].find({
                 'status': Booking.STATUS_COMPLETED,
-                'signature_status': 'unsigned',
+                'signature_status': {'$in': ['unsigned', 'requested']},
                 'updated_at': {'$lt': cutoff_date}
+            })
+        )
+
+    @staticmethod
+    def request_signature(booking_id, timeout_hours=48):
+        """Request signature for a completed booking."""
+        from datetime import timedelta
+        timeout_at = datetime.utcnow() + timedelta(hours=timeout_hours)
+
+        result = mongo.db[Booking.COLLECTION].update_one(
+            {'_id': ObjectId(booking_id)},
+            {
+                '$set': {
+                    'signature_status': 'requested',
+                    'signature_requested_at': datetime.utcnow(),
+                    'signature_timeout_at': timeout_at,
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        return result.modified_count > 0
+
+    @staticmethod
+    def submit_signature(booking_id, signature_hash):
+        """Submit signature for a booking."""
+        result = mongo.db[Booking.COLLECTION].update_one(
+            {'_id': ObjectId(booking_id)},
+            {
+                '$set': {
+                    'signature_status': 'signed',
+                    'signature_hash': signature_hash,
+                    'signature_submitted_at': datetime.utcnow(),
+                    'status': Booking.STATUS_VERIFIED,
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        return result.modified_count > 0
+
+    @staticmethod
+    def escalate_signature_timeout(booking_id):
+        """Escalate booking due to signature timeout."""
+        result = mongo.db[Booking.COLLECTION].update_one(
+            {'_id': ObjectId(booking_id)},
+            {
+                '$set': {
+                    'signature_status': 'expired',
+                    'signature_escalated': True,
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        return result.modified_count > 0
+
+    @staticmethod
+    def get_expired_signatures():
+        """Get bookings with expired signature requests."""
+        current_time = datetime.utcnow()
+
+        return list(
+            mongo.db[Booking.COLLECTION].find({
+                'signature_status': 'requested',
+                'signature_timeout_at': {'$lt': current_time},
+                'signature_escalated': False
             })
         )
     
@@ -204,8 +273,12 @@ class Booking:
         mongo.db[Booking.COLLECTION].create_index('status')
         mongo.db[Booking.COLLECTION].create_index('signature_status')
         mongo.db[Booking.COLLECTION].create_index('payment_status')
+        mongo.db[Booking.COLLECTION].create_index('signature_timeout_at')
+        mongo.db[Booking.COLLECTION].create_index('signature_escalated')
         mongo.db[Booking.COLLECTION].create_index([('status', 1), ('created_at', -1)])
         mongo.db[Booking.COLLECTION].create_index([('vendor_id', 1), ('status', 1)])
+        mongo.db[Booking.COLLECTION].create_index([('signature_status', 1), ('signature_timeout_at', 1)])
+        mongo.db[Booking.COLLECTION].create_index([('status', 1), ('signature_status', 1)])
     
     @staticmethod
     def to_dict(booking):

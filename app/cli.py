@@ -52,6 +52,34 @@ def init_db():
         click.echo(f'\n❌ Error initializing database: {str(e)}', err=True)
 
 
+@click.command('monitor-signatures')
+@with_appcontext
+def monitor_signatures():
+    """Monitor signature timeouts and send reminders."""
+    try:
+        from app.tasks.signature_monitor import run_signature_monitor
+
+        click.echo('Starting signature monitoring...')
+        result = run_signature_monitor()
+
+        click.echo('\n📊 Signature Monitoring Results:')
+        click.echo(f'   • Escalated timeouts: {result["escalated"]}')
+        click.echo(f'   • Reminders sent: {result["reminders_sent"]}')
+
+        stats = result["statistics"]
+        click.echo(f'\n📈 Current Statistics:')
+        click.echo(f'   • Pending signatures: {stats["total_pending"]}')
+        click.echo(f'   • Expired signatures: {stats["total_expired"]}')
+        click.echo(f'   • Completed signatures: {stats["total_signed"]}')
+        click.echo(f'   • Expiring soon (24h): {stats["expiring_soon"]}')
+
+        click.echo('\n✅ Signature monitoring completed successfully!')
+
+    except Exception as e:
+        click.echo(f'❌ Error during signature monitoring: {str(e)}')
+        raise
+
+
 @click.command('create-admin')
 @click.option('--email', prompt='Admin email', help='Admin email address')
 @click.option('--password', prompt='Admin password', hide_input=True, confirmation_prompt=True, help='Admin password')
