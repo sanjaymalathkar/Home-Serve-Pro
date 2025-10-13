@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Register - HomeServe Pro{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Create Account</h2>
+                        <p class="text-muted">Join HomeServe Pro today</p>
+                    </div>
+
+                    <div id="alert-container"></div>
+
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   placeholder="Enter your full name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required 
+                                   placeholder="Enter your email">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required 
+                                   placeholder="Enter your phone number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   placeholder="Create a password" minlength="6">
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required 
+                                   placeholder="Confirm your password">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Register As</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="customer" selected>Customer</option>
+                                <option value="vendor">Service Provider (Vendor)</option>
+                            </select>
+                        </div>
+
+                        <div id="addressFields" class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="2" 
+                                      placeholder="Enter your address"></textarea>
+                        </div>
+
+                        <div id="pincodeField" class="mb-3">
+                            <label for="pincode" class="form-label">Pincode</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" 
+                                   placeholder="Enter your pincode">
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" class="text-primary">Terms & Conditions</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3" id="registerBtn">
+                            <span id="registerBtnText">Create Account</span>
+                            <span id="registerBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p class="mb-2">Already have an account? <a href="/login" class="text-primary">Login here</a></p>
+                        <p><a href="/" class="text-muted">Back to Home</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show alert message
+    function showAlert(message, type = 'danger') {
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        // Scroll to top to show alert
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Handle registration form submission
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const registerBtn = document.getElementById('registerBtn');
+        const registerBtnText = document.getElementById('registerBtnText');
+        const registerBtnSpinner = document.getElementById('registerBtnSpinner');
+
+        // Get form data
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const role = document.getElementById('role').value;
+        const address = document.getElementById('address').value;
+        const pincode = document.getElementById('pincode').value;
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            showAlert('Passwords do not match!');
+            return;
+        }
+
+        // Disable button and show spinner
+        registerBtn.disabled = true;
+        registerBtnText.classList.add('d-none');
+        registerBtnSpinner.classList.remove('d-none');
+
+        try {
+            // Send registration request
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    phone,
+                    password,
+                    role,
+                    address,
+                    pincode
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Show success message
+                showAlert('Registration successful! Redirecting to login...', 'success');
+
+                // Redirect to login after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                showAlert(data.message || 'Registration failed. Please try again.');
+                registerBtn.disabled = false;
+                registerBtnText.classList.remove('d-none');
+                registerBtnSpinner.classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            showAlert('An error occurred. Please try again.');
+            registerBtn.disabled = false;
+            registerBtnText.classList.remove('d-none');
+            registerBtnSpinner.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}
+

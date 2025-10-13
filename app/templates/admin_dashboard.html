@@ -1,0 +1,1272 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - HomeServe Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-dark text-white sidebar">
+            <div class="position-sticky pt-3">
+                <h5 class="text-warning mb-3">Admin Menu</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="#" onclick="showSection('overview', event)">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('users', event)">
+                            <i class="fas fa-users me-2"></i>Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('vendors', event)">
+                            <i class="fas fa-user-tie me-2"></i>Vendors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('bookings', event)">
+                            <i class="fas fa-calendar me-2"></i>Bookings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('operating', event)">
+                            <i class="fas fa-truck me-2"></i>Operating
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('services', event)">
+                            <i class="fas fa-tools me-2"></i>Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('financial', event)">
+                            <i class="fas fa-rupee-sign me-2"></i>Financial
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#" onclick="showSection('profile', event)">
+                            <i class="fas fa-user-cog me-2"></i>Profile Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Admin Dashboard</h1>
+                <div>
+                    <span class="badge bg-danger">Admin</span>
+                    <span id="userName" class="ms-2 text-muted"></span>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overviewSection" class="dashboard-section">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Users</h5>
+                                <h2 id="totalUsers">5</h2>
+                                <small>Registered users</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Vendors</h5>
+                                <h2 id="totalVendors">1</h2>
+                                <small>Active vendors</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Bookings</h5>
+                                <h2 id="totalBookings">0</h2>
+                                <small>All time</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Services</h5>
+                                <h2 id="totalServices">6</h2>
+                                <small>Available services</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">System Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><i class="fas fa-check-circle text-success me-2"></i>Database: Connected</p>
+                                <p><i class="fas fa-check-circle text-success me-2"></i>API: Operational</p>
+                                <p><i class="fas fa-check-circle text-success me-2"></i>WebSocket: Active</p>
+                                <p><i class="fas fa-check-circle text-success me-2"></i>AI Chatbot: Ready</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <button class="btn btn-primary btn-sm mb-2 w-100" onclick="showSection('users')">
+                                    <i class="fas fa-users me-2"></i>Manage Users
+                                </button>
+                                <button class="btn btn-success btn-sm mb-2 w-100" onclick="showSection('vendors')">
+                                    <i class="fas fa-user-tie me-2"></i>Manage Vendors
+                                </button>
+                                <button class="btn btn-info btn-sm mb-2 w-100" onclick="showSection('services')">
+                                    <i class="fas fa-tools me-2"></i>Manage Services
+                                </button>
+                                <button class="btn btn-warning btn-sm w-100" onclick="showSection('bookings')">
+                                    <i class="fas fa-calendar me-2"></i>View Bookings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="usersSection" class="dashboard-section d-none">
+                <h3 class="mb-3">User Management</h3>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Role</label>
+                                <select id="filterUserRole" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="customer">Customer</option>
+                                    <option value="vendor">Vendor</option>
+                                    <option value="onboard_manager">Onboard Manager</option>
+                                    <option value="ops_manager">Ops Manager</option>
+                                    <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Active</label>
+                                <select id="filterUserActive" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="loadUsers()">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th style="width: 120px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Loading users...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendors Section -->
+            <div id="vendorsSection" class="dashboard-section d-none">
+                <h3 class="mb-3">Vendor Management</h3>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label">Status</label>
+                                <select id="filterVendorStatus" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Only Available</label>
+                                <select id="filterVendorAvailable" class="form-select">
+                                    <option value="">Any</option>
+                                    <option value="true">Available</option>
+                                    <option value="false">Offline</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="loadAdminVendors()">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Services</th>
+                                        <th>Rating</th>
+                                        <th>Jobs</th>
+                                        <th>Earnings</th>
+                                        <th>Status</th>
+                                        <th style="width: 260px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vendorsTableBody">
+                                    <tr><td colspan="7" class="text-center py-4 text-muted">Loading vendors...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light fw-semibold">Pending Payouts</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th>Amount</th>
+                                        <th>Requested At</th>
+                                        <th style="width: 140px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payoutsTableBody">
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading payouts...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            <div id="bookingsSection" class="dashboard-section d-none">
+                <h3 class="mb-3">Booking Management</h3>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select id="filterBookingStatus" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="accepted">Accepted</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="verified">Verified</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="loadAdminBookings()">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Pincode</th>
+                                        <th>Amount</th>
+                                        <th style="width: 260px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingsTableBody">
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Loading bookings...</td></tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operating Section -->
+            <div id="operatingSection" class="dashboard-section d-none">
+                <h3 class="mb-3">Booking & Operating</h3>
+                <div class="card mb-3">
+                    <div class="card-header bg-light fw-semibold">Live Jobs</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-end mb-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadLiveJobs()">
+                                <i class="fas fa-sync me-1"></i>Refresh
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Pincode</th>
+                                        <th>Vendor</th>
+                                        <th style="width: 260px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="liveJobsTableBody">
+                                    <tr><td colspan="6" class="text-center py-4 text-muted">Loading live jobs...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light fw-semibold">Instant Booking - Find Available Vendors</div>
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end mb-3">
+                            <div class="col-md-5">
+                                <label class="form-label">Service</label>
+                                <select id="opServiceSelect" class="form-select"></select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Pincode (optional)</label>
+                                <input id="opPincode" class="form-control" placeholder="e.g., 560001">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="loadInstantVendors()">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Availability</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="instantVendorsTableBody">
+                                    <tr><td colspan="4" class="text-center py-3 text-muted">Choose a service and search</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reassign Modal -->
+            <div class="modal fade" id="reassignModal" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Reassign Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <input type="hidden" id="reassignBookingId">
+                    <div class="mb-2">
+                        <label class="form-label">Select Vendor</label>
+                        <select id="reassignVendorSelect" class="form-select"></select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmReassign()">Reassign</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Services Section -->
+            <div id="servicesSection" class="dashboard-section d-none">
+                <h3 class="mb-3">Service Management</h3>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form class="row g-2" onsubmit="return createService(event)">
+                            <div class="col-md-3">
+                                <input id="newServiceName" class="form-control" placeholder="Service name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input id="newServiceCategory" class="form-control" placeholder="Category">
+                            </div>
+                            <div class="col-md-3">
+                                <input id="newServicePrice" type="number" class="form-control" placeholder="Base price" min="0">
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-success w-100" type="submit">
+                                    <i class="fas fa-plus me-2"></i>Add Service
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Base Price</th>
+                                        <th>Active</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="servicesTableBody">
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading services...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-header bg-light fw-semibold">Manage Selected Service</div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Select Service</label>
+                                <select id="manageServiceSelect" class="form-select" onchange="onSelectServiceForManage()">
+                                    <option value="">-- choose a service --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="serviceManageArea" class="d-none">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="mb-2">Sub-Services</h6>
+                                    <form class="row g-2 mb-2" onsubmit="return createSubService(event)">
+                                        <div class="col-6"><input id="subName" class="form-control" placeholder="Sub-service name" required></div>
+                                        <div class="col-4"><input id="subPrice" type="number" class="form-control" placeholder="Price" min="0"></div>
+                                        <div class="col-2"><button class="btn btn-outline-success w-100" type="submit">Add</button></div>
+                                    </form>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead><tr><th>Name</th><th>Price</th><th style="width:100px;">Action</th></tr></thead>
+                                            <tbody id="subServicesTableBody">
+                                                <tr><td colspan="3" class="text-muted">No sub-services</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="mb-2">Commission Settings</h6>
+                                    <form onsubmit="return saveCommission(event)">
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">Type</label>
+                                                <select id="commType" class="form-select">
+                                                    <option value="percent">Percent</option>
+                                                    <option value="fixed">Fixed</option>
+                                                    <option value="hybrid">Hybrid</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-3">
+                                                <label class="form-label">% Commission</label>
+                                                <input id="commPercent" type="number" min="0" max="100" class="form-control" placeholder="%">
+                                            </div>
+                                            <div class="col-3">
+                                                <label class="form-label">Fixed (₹)</label>
+                                                <input id="commFixed" type="number" min="0" class="form-control" placeholder="₹">
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-4">
+                                                <label class="form-label">Cancel Fee %</label>
+                                                <input id="commCancel" type="number" min="0" max="100" class="form-control" placeholder="%">
+                                            </div>
+                                            <div class="col-4 d-flex align-items-end">
+                                                <button class="btn btn-primary" type="submit">Save Commission</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Financial Section -->
+            <div id="financialSection" class="dashboard-section d-none">
+                <h3 class="mb-3">Financial Management</h3>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <div class="card text-bg-success">
+                            <div class="card-body">
+                                <div class="small text-uppercase">Total Revenue</div>
+                                <div id="kpiRevenue" class="h4 mb-0">₹ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-bg-danger">
+                            <div class="card-body">
+                                <div class="small text-uppercase">Refunded</div>
+                                <div id="kpiRefunded" class="h4 mb-0">₹ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-bg-warning text-dark">
+                            <div class="card-body">
+                                <div class="small text-uppercase">Pending Payouts</div>
+                                <div id="kpiPendingPayouts" class="h4 mb-0">₹ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-bg-primary">
+                            <div class="card-body">
+                                <div class="small text-uppercase">Completed Payouts</div>
+                                <div id="kpiCompletedPayouts" class="h4 mb-0">₹ 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label>
+                                <select id="filterPaymentStatus" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="failed">Failed</option>
+                                    <option value="refunded">Refunded</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Type</label>
+                                <select id="filterPaymentType" class="form-select">
+                                    <option value="">All</option>
+                                    <option value="booking">Booking</option>
+                                    <option value="payout">Payout</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="loadFinance()">
+                                    <i class="fas fa-sync me-2"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header bg-light fw-semibold">Payments</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+
+
+
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th style="width: 180px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentsTableBody">
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Loading payments...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light fw-semibold">Pending Payouts</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th>Amount</th>
+                                        <th>Requested At</th>
+                                        <th style="width: 140px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="financePayoutsTableBody">
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading payouts...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="dashboard-section d-none">
+                <h3 class="mb-4">Profile Settings</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="profileName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="profileName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="profileEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profileEmail" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="profilePhone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="profilePhone" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="profileRole" class="form-label">Role</label>
+                                    <input type="text" class="form-control" id="profileRole" readonly>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+
+    let servicesCache = [];
+    let selectedServiceId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+
+        // Setup profile form handler
+        const profileForm = document.getElementById('profileForm');
+        if (profileForm) {
+            profileForm.addEventListener('submit', handleProfileSubmit);
+        }
+    });
+
+    function showSection(section, evt) {
+        document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById(section + 'Section').classList.remove('d-none');
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+        if (evt && evt.target) {
+            evt.target.classList.add('active');
+        }
+
+        // Load section data
+        if (section === 'profile') {
+            loadProfile();
+        } else if (section === 'users') {
+            loadUsers();
+        } else if (section === 'vendors') {
+            loadAdminVendors();
+            loadPendingPayouts();
+        } else if (section === 'bookings') {
+            loadAdminBookings();
+        } else if (section === 'services') {
+            loadServices();
+        } else if (section === 'financial') {
+            loadFinance();
+        } else if (section === 'operating') {
+            loadOperating();
+        }
+
+
+        async function loadFinance() {
+            await Promise.all([loadFinanceSummary(), loadPayments(), loadFinancePendingPayouts()]);
+        }
+
+        async function loadFinanceSummary() {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/super_admin/finance/summary', { headers:{ 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!data.success) return;
+            const s = data.data || data;
+            document.getElementById('kpiRevenue').textContent = `₹ ${s.total_revenue||0}`;
+            document.getElementById('kpiRefunded').textContent = `₹ ${s.refunded_total||0}`;
+            document.getElementById('kpiPendingPayouts').textContent = `₹ ${s.pending_payouts_total||0}`;
+            document.getElementById('kpiCompletedPayouts').textContent = `₹ ${s.completed_payouts_total||0}`;
+        }
+
+        async function loadPayments() {
+            const status = document.getElementById('filterPaymentStatus').value;
+            const ptype = document.getElementById('filterPaymentType').value;
+            const qs = new URLSearchParams();
+            if (status) qs.set('status', status);
+            if (ptype) qs.set('payment_type', ptype);
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/super_admin/payments?' + qs.toString(), { headers:{ 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const tbody = document.getElementById('paymentsTableBody');
+            if (!data.success) { tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load payments'}</td></tr>`; return; }
+            tbody.innerHTML = (data.payments||[]).map(p => {
+                const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
+                const amt = (p.amount!=null) ? `₹ ${p.amount}` : '-';
+                const type = (p.payment_type||'').toUpperCase();
+                const status = (p.status||'-');
+                const canInvoice = (p.payment_type==='booking' && p.status==='completed' && !p.invoice_number);
+                const inv = p.invoice_number ? `<span class=\"badge bg-secondary\">${p.invoice_number}</span>` : '';
+                const btns = `<div class=\"btn-group btn-group-sm\">${canInvoice?`<button class=\"btn btn-outline-primary\" onclick=\"generateInvoice('${p.id}')\">Generate Invoice</button>`:''}</div>`;
+                return `<tr>
+                    <td>${type}</td>
+                    <td>${status}</td>
+                    <td>${amt}</td>
+                    <td>${dt}</td>
+                    <td>${inv} ${btns}</td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="5" class="text-center text-muted">No payments found</td></tr>';
+        }
+
+        async function generateInvoice(paymentId) {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`/api/super_admin/payments/${paymentId}/invoice`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+            loadPayments();
+        }
+
+        async function loadFinancePendingPayouts() {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/super_admin/payouts/pending', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            const tbody = document.getElementById('financePayoutsTableBody');
+            if (!data.success) { tbody.innerHTML = `<tr><td colspan="4" class="text-danger">${data.message||'Failed to load payouts'}</td></tr>`; return; }
+            const payouts = (data.payouts || []);
+            tbody.innerHTML = payouts.map(p => {
+                const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
+                const vname = (p.vendor && (p.vendor.name || (p.vendor.user_id))) || '-';
+                return `<tr>
+                    <td>${vname}</td>
+                    <td>₹ ${p.amount}</td>
+                    <td>${dt}</td>
+                    <td>
+                        <button class=\"btn btn-sm btn-success\" onclick=\"approvePayout('${p.id || p._id}')\">Approve</button>
+                    </td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="4" class="text-center text-muted">No pending payouts</td></tr>';
+        }
+
+
+
+    async function loadUsers() {
+        const role = document.getElementById('filterUserRole').value;
+        const active = document.getElementById('filterUserActive').value;
+        const qs = new URLSearchParams();
+        if (role) qs.set('role', role);
+        if (active) qs.set('active', active);
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/users?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('usersTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="5" class="text-danger">${data.message||'Failed to load users'}</td></tr>`; return; }
+        tbody.innerHTML = (data.users||[]).map(u => {
+            const badge = u.active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
+            const btnLabel = u.active ? 'Deactivate' : 'Activate';
+            return `<tr>
+                <td>${u.name||'-'}</td>
+                <td>${u.email||'-'}</td>
+                <td>${(u.role||'').replaceAll('_',' ')}</td>
+                <td>${badge}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="toggleUserActive('${u.id}')">${btnLabel}</button>
+                </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" class="text-center text-muted">No users found</td></tr>';
+    }
+
+    async function toggleUserActive(userId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/users/${userId}/toggle-active`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadUsers();
+    }
+
+    async function loadAdminVendors() {
+        const status = document.getElementById('filterVendorStatus').value;
+        const avail = document.getElementById('filterVendorAvailable').value;
+        const qs = new URLSearchParams();
+        if (status) qs.set('onboarding_status', status);
+        if (avail) qs.set('availability', avail);
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/vendors?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('vendorsTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="7" class="text-danger">${data.message||'Failed to load vendors'}</td></tr>`; return; }
+        tbody.innerHTML = (data.vendors||[]).map(v => {
+            const services = (v.services||[]).map(s => s.name||s).slice(0,3).join(', ') || '-';
+            const rating = v.ratings?.toFixed ? v.ratings.toFixed(1) : (v.ratings||0);
+            const statusBadge = {
+                'approved':'bg-success','pending':'bg-warning text-dark','rejected':'bg-danger','suspended':'bg-secondary'
+            }[v.onboarding_status||'pending'] || 'bg-light text-dark';
+            return `<tr>
+                <td>${v.name||'-'}</td>
+                <td>${services}</td>
+                <td>⭐ ${rating}</td>
+                <td>${v.completed_jobs||0}</td>
+                <td>₹ ${(v.earnings||0)}</td>
+                <td><span class="badge ${statusBadge}">${v.onboarding_status||'pending'}</span></td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-success" onclick="setVendorStatus('${v.id}','approved')">Approve</button>
+                        <button class="btn btn-outline-danger" onclick="setVendorStatus('${v.id}','rejected')">Reject</button>
+                        <button class="btn btn-outline-secondary" onclick="setVendorStatus('${v.id}','suspended')">Suspend</button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="7" class="text-center text-muted">No vendors found</td></tr>';
+    }
+
+    async function loadPendingPayouts() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/payouts/pending', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('payoutsTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="4" class="text-danger">${data.message||'Failed to load payouts'}</td></tr>`; return; }
+        const payouts = (data.payouts || []);
+        tbody.innerHTML = payouts.map(p => {
+            const dt = p.created_at ? new Date(p.created_at).toLocaleString() : '-';
+            const vname = (p.vendor && (p.vendor.name || (p.vendor.user_id))) || '-';
+            return `<tr>
+                <td>${vname}</td>
+                <td>₹ ${p.amount}</td>
+                <td>${dt}</td>
+                <td>
+                    <button class="btn btn-sm btn-success" onclick="approvePayout('${p.id || p._id}')">Approve</button>
+                </td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="4" class="text-center text-muted">No pending payouts</td></tr>';
+    }
+
+    async function approvePayout(paymentId) {
+        if (!confirm('Approve this payout?')) return;
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/payouts/${paymentId}/approve`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` }});
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadPendingPayouts();
+        loadAdminVendors();
+    }
+
+    async function setVendorStatus(id, status) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/vendors/${id}/set-status`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ onboarding_status: status }) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadAdminVendors();
+    }
+
+    async function loadAdminBookings() {
+        const status = document.getElementById('filterBookingStatus').value;
+        const qs = new URLSearchParams();
+        if (status) qs.set('status', status);
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/bookings?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('bookingsTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-danger\">${data.message||'Failed to load bookings'}</td></tr>`; return; }
+        tbody.innerHTML = (data.bookings||[]).map(b => {
+            const dt = b.service_date ? new Date(b.service_date).toLocaleString() : '-';
+            const pin = b.pincode || '-';
+            const amt = (b.amount!=null) ? `₹ ${b.amount}` : '-';
+            const canConfirm = (b.status === 'pending');
+            const canRefund = (b.payment_status !== 'refunded');
+            const btns = `<div class=\"btn-group btn-group-sm\">
+                ${canConfirm ? `<button class=\"btn btn-outline-success\" onclick=\"confirmBooking('${b.id}')\">Confirm</button>` : ''}
+                ${canRefund ? `<button class=\"btn btn-outline-danger\" onclick=\"refundBooking('${b.id}')\">Refund</button>` : ''}
+            </div>`;
+            return `<tr>
+                <td>${b.service_name||b.service_id||'-'}</td>
+                <td><span class=\"badge bg-info text-dark\">${b.status}</span></td>
+                <td>${dt}</td>
+                <td>${pin}</td>
+                <td>${amt}</td>
+                <td>${btns}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="6" class="text-center text-muted">No bookings found</td></tr>';
+
+    async function confirmBooking(bookingId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/confirm`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadAdminBookings();
+    }
+
+    async function refundBooking(bookingId) {
+        const reason = prompt('Refund reason (optional):') || undefined;
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/refund`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ reason, cancel: true }) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadAdminBookings();
+    }
+
+    async function loadOperating() {
+        await Promise.all([populateOperatingServices(), loadLiveJobs()]);
+    }
+
+    async function populateOperatingServices() {
+        // Use cached services if present; otherwise fetch
+        const sel = document.getElementById('opServiceSelect');
+        if (!sel) return;
+        if (!Array.isArray(servicesCache) || servicesCache.length === 0) {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch('/api/super_admin/services', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            servicesCache = Array.isArray(data.data||data) ? (data.data||data) : [];
+        }
+        sel.innerHTML = '<option value="">-- choose service --</option>' + servicesCache.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    }
+
+    async function loadLiveJobs() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/bookings/live', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('liveJobsTableBody');
+        if (!tbody) return;
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan="6" class="text-danger">${data.message||'Failed to load live jobs'}</td></tr>`; return; }
+        tbody.innerHTML = (data.bookings||[]).map(b => {
+            const dt = b.service_date ? new Date(b.service_date).toLocaleString() : '-';
+            const pin = b.pincode || '-';
+            const vendor = b.vendor_name || b.vendor_id || '-';
+            const canStart = (b.status === 'accepted' || b.status === 'pending');
+            const canComplete = (b.status === 'in_progress' || b.status === 'accepted');
+            const canCancel = (b.status !== 'completed' && b.status !== 'verified' && b.status !== 'cancelled');
+            const btns = `<div class="btn-group btn-group-sm">
+                ${canStart ? `<button class="btn btn-outline-primary" onclick="startJob('${b.id}')">Start</button>` : ''}
+                ${canComplete ? `<button class="btn btn-outline-success" onclick="completeJob('${b.id}')">Complete</button>` : ''}
+                ${canCancel ? `<button class="btn btn-outline-danger" onclick="cancelJob('${b.id}')">Cancel</button>` : ''}
+                <button class="btn btn-outline-secondary" onclick="openReassignModal('${b.id}')">Reassign</button>
+            </div>`;
+            return `<tr>
+                <td>${b.service_name||b.service_id||'-'}</td>
+                <td><span class="badge bg-info text-dark">${b.status}</span></td>
+                <td>${dt}</td>
+                <td>${pin}</td>
+                <td>${vendor}</td>
+                <td>${btns}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="6" class="text-center text-muted">No live jobs right now</td></tr>';
+    }
+
+    async function startJob(bookingId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/start`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadLiveJobs();
+    }
+
+    async function completeJob(bookingId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/complete`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadLiveJobs();
+    }
+
+    async function cancelJob(bookingId) {
+        if (!confirm('Cancel this booking?')) return;
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/cancel`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadLiveJobs();
+    }
+
+
+    let _reassignModal;
+    async function openReassignModal(bookingId) {
+        document.getElementById('reassignBookingId').value = bookingId;
+        const vendorSel = document.getElementById('reassignVendorSelect');
+        vendorSel.innerHTML = '<option>Loading...</option>';
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/available-vendors`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const vendors = (data.vendors || []);
+        vendorSel.innerHTML = vendors.length ? vendors.map(v => `<option value="${v.id}">${v.name||v.id} (${v.onboarding_status||'approved'})</option>`).join('') : '<option value="">No available vendors</option>';
+        if (!_reassignModal) {
+            _reassignModal = new bootstrap.Modal(document.getElementById('reassignModal'));
+        }
+        _reassignModal.show();
+    }
+
+    async function confirmReassign() {
+        const bookingId = document.getElementById('reassignBookingId').value;
+        const vendorId = document.getElementById('reassignVendorSelect').value;
+        if (!vendorId) { alert('Select a vendor'); return; }
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/bookings/${bookingId}/reassign`, { method:'POST', headers:{ 'Authorization': `Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ vendor_id: vendorId }) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        if (_reassignModal) _reassignModal.hide();
+        loadLiveJobs();
+    }
+
+    async function loadInstantVendors() {
+        const serviceId = document.getElementById('opServiceSelect').value;
+        const pincode = document.getElementById('opPincode').value.trim();
+        const tbody = document.getElementById('instantVendorsTableBody');
+        if (!serviceId) { tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Select a service first</td></tr>'; return; }
+        const qs = new URLSearchParams();
+        qs.set('service_id', serviceId);
+        if (pincode) qs.set('pincode', pincode);
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/vendors/available?' + qs.toString(), { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan=\"4\" class=\"text-danger\">${data.message||'Failed to search vendors'}</td></tr>`; return; }
+        const vendors = data.vendors || [];
+        tbody.innerHTML = vendors.map(v => `<tr>
+            <td>${v.name||'-'}</td>
+            <td>${v.phone||'-'}</td>
+            <td>${v.onboarding_status||'-'}</td>
+            <td>${v.availability?'<span class=\'badge bg-success\'>Available</span>':'<span class=\'badge bg-secondary\'>Unavailable</span>'}</td>
+        </tr>`).join('') || '<tr><td colspan="4" class="text-center text-muted">No vendors found</td></tr>';
+    }
+
+
+
+    async function loadServices() {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/services', { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('servicesTableBody');
+        if (!data.success) { tbody.innerHTML = `<tr><td colspan=\"4\" class=\"text-danger\">${data.message||'Failed to load services'}</td></tr>`; return; }
+        const list = (data.data||data);
+        servicesCache = Array.isArray(list) ? list : [];
+        tbody.innerHTML = servicesCache.map(s => {
+            const active = s.active ? '<span class=\"badge bg-success\">Yes</span>' : '<span class=\"badge bg-secondary\">No</span>';
+            return `<tr>
+                <td>${s.name||'-'}</td>
+                <td>${s.category||'-'}</td>
+                <td>${s.base_price!=null?('₹ '+s.base_price):'-'}</td>
+                <td>${active}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan=\"4\" class=\"text-center text-muted\">No services found</td></tr>';
+        const sel = document.getElementById('manageServiceSelect');
+        if (sel) sel.innerHTML = '<option value=\"\">-- choose a service --</option>' + servicesCache.map(s => `<option value=\"${s.id}\">${s.name}</option>`).join('');
+    }
+
+    function onSelectServiceForManage() {
+        const sel = document.getElementById('manageServiceSelect');
+        selectedServiceId = sel.value || null;
+        document.getElementById('serviceManageArea').classList.toggle('d-none', !selectedServiceId);
+        if (selectedServiceId) loadServiceDetails(selectedServiceId);
+    }
+
+    async function loadServiceDetails(serviceId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/services/${serviceId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Could not load service')); return; }
+        const s = data.data || data;
+        // render sub-services
+        const tbody = document.getElementById('subServicesTableBody');
+        const subs = s.sub_services || [];
+        tbody.innerHTML = subs.map(x => `<tr>
+            <td>${x.name||'-'}</td>
+            <td>${x.base_price!=null?('₹ '+x.base_price):'-'}</td>
+            <td><button class="btn btn-sm btn-outline-danger" onclick="deleteSubService('${s.id}','${x.id}')">Delete</button></td>
+        </tr>`).join('') || '<tr><td colspan="3" class="text-muted">No sub-services</td></tr>';
+        // fill commission
+        const c = s.commission || {};
+        document.getElementById('commType').value = c.type || 'percent';
+        document.getElementById('commPercent').value = c.percent || '';
+        document.getElementById('commFixed').value = c.fixed || '';
+        document.getElementById('commCancel').value = c.cancellation_fee_percent || '';
+    }
+
+    async function createSubService(e) {
+        e.preventDefault();
+        if (!selectedServiceId) return false;
+        const name = document.getElementById('subName').value.trim();
+        const base_price = parseFloat(document.getElementById('subPrice').value || '0');
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/services/${selectedServiceId}/sub-services`, { method:'POST', headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify({ name, base_price }) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return false; }
+        document.getElementById('subName').value = '';
+        document.getElementById('subPrice').value = '';
+        loadServiceDetails(selectedServiceId);
+        return false;
+    }
+
+    async function deleteSubService(serviceId, subId) {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/services/${serviceId}/sub-services/${subId}`, { method:'DELETE', headers:{ 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return; }
+        loadServiceDetails(serviceId);
+    }
+
+    async function saveCommission(e) {
+        e.preventDefault();
+        if (!selectedServiceId) return false;
+        const payload = {
+            type: document.getElementById('commType').value,
+            percent: parseFloat(document.getElementById('commPercent').value || '0'),
+            fixed: parseFloat(document.getElementById('commFixed').value || '0'),
+            cancellation_fee_percent: parseFloat(document.getElementById('commCancel').value || '0')
+        };
+        const token = localStorage.getItem('access_token');
+        const res = await fetch(`/api/super_admin/services/${selectedServiceId}/commission`, { method:'PUT', headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return false; }
+        alert('Commission saved');
+        return false;
+    }
+
+
+    async function createService(e) {
+        e.preventDefault();
+        const name = document.getElementById('newServiceName').value.trim();
+        const category = document.getElementById('newServiceCategory').value.trim();
+        const base_price = parseFloat(document.getElementById('newServicePrice').value || '0');
+        const payload = { name, category, base_price, active: true };
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/super_admin/services', { method:'POST', headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!data.success) { alert('Failed: ' + (data.message||'Unknown')); return false; }
+        document.getElementById('newServiceName').value = '';
+        document.getElementById('newServiceCategory').value = '';
+        document.getElementById('newServicePrice').value = '';
+        loadServices();
+        return false;
+    }
+
+
+    function loadProfile() {
+        document.getElementById('profileName').value = currentUser.name || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        document.getElementById('profileRole').value = formatRole(currentUser.role || '');
+    }
+
+    function formatRole(role) {
+        return role.split('_').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    async function handleProfileSubmit(e) {
+        e.preventDefault();
+
+        const updatedData = {
+            name: document.getElementById('profileName').value,
+            phone: document.getElementById('profilePhone').value
+        };
+
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('✅ Profile updated successfully!');
+                // Update local storage
+                currentUser = { ...currentUser, ...updatedData };
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                document.getElementById('userName').textContent = currentUser.name;
+            } else {
+                alert('❌ Failed to update profile: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('❌ Error updating profile. Please try again.');
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+    }
+    .nav-link {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+    .nav-link:hover, .nav-link.active {
+        background-color: rgba(255,255,255,0.1);
+    }
+</style>
+{% endblock %}
+

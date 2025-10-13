@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Our Services - HomeServe Pro{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Our Services</h1>
+        <p class="lead text-muted">Professional home services at your doorstep</p>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading services...</p>
+    </div>
+
+    <!-- Services Grid -->
+    <div id="servicesContainer" class="row g-4 d-none">
+        <!-- Services will be loaded here dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="text-center py-5 d-none">
+        <i class="fas fa-tools fa-4x text-muted mb-3"></i>
+        <h3 class="text-muted">No services available</h3>
+        <p class="text-muted">Please check back later</p>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center mt-5 pt-5">
+        <div class="card bg-primary text-white shadow-lg">
+            <div class="card-body p-5">
+                <h2 class="fw-bold mb-3">Ready to Get Started?</h2>
+                <p class="lead mb-4">Book a service today and experience professional home care</p>
+                <a href="/register" class="btn btn-light btn-lg px-5">Register Now</a>
+                <a href="/login" class="btn btn-outline-light btn-lg px-5 ms-2">Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Service category icons
+    const categoryIcons = {
+        'plumbing': 'fa-wrench',
+        'electrical': 'fa-bolt',
+        'painting': 'fa-paint-roller',
+        'cleaning': 'fa-broom',
+        'carpentry': 'fa-hammer',
+        'appliance_repair': 'fa-tools',
+        'pest_control': 'fa-bug',
+        'gardening': 'fa-leaf'
+    };
+
+    // Service category colors
+    const categoryColors = {
+        'plumbing': 'primary',
+        'electrical': 'warning',
+        'painting': 'info',
+        'cleaning': 'success',
+        'carpentry': 'secondary',
+        'appliance_repair': 'danger',
+        'pest_control': 'dark',
+        'gardening': 'success'
+    };
+
+    // Load services on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadServices();
+    });
+
+    async function loadServices() {
+        const loading = document.getElementById('loading');
+        const servicesContainer = document.getElementById('servicesContainer');
+        const emptyState = document.getElementById('emptyState');
+
+        try {
+            // Use public endpoint that doesn't require authentication
+            const response = await fetch('/api/services');
+            const data = await response.json();
+
+            loading.classList.add('d-none');
+
+            if (data.success && data.data && data.data.length > 0) {
+                servicesContainer.classList.remove('d-none');
+                renderServices(data.data);
+            } else {
+                emptyState.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Error loading services:', error);
+            loading.classList.add('d-none');
+            emptyState.classList.remove('d-none');
+        }
+    }
+
+    function renderServices(services) {
+        const container = document.getElementById('servicesContainer');
+        container.innerHTML = '';
+
+        services.forEach(service => {
+            const category = service.category || 'plumbing';
+            const icon = categoryIcons[category] || 'fa-tools';
+            const color = categoryColors[category] || 'primary';
+
+            const serviceCard = `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-${color} text-white rounded-circle p-3 me-3">
+                                    <i class="fas ${icon} fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-0">${service.name}</h5>
+                                    <span class="badge bg-${color}">${formatCategory(category)}</span>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">${service.description || 'Professional service at your doorstep'}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <h4 class="text-primary mb-0">₹${service.base_price || 0}</h4>
+                                    <small class="text-muted">Starting price</small>
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock text-muted"></i>
+                                    <small class="text-muted">${service.duration_minutes || 60} mins</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mt-3" onclick="bookService('${service._id || service.id}', '${service.name}')">
+                                <i class="fas fa-calendar-check me-2"></i>Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += serviceCard;
+        });
+    }
+
+    function formatCategory(category) {
+        return category.split('_').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    function bookService(serviceId, serviceName) {
+        // Check if user is logged in
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            // Redirect to login
+            alert('Please login to book a service');
+            window.location.href = '/login';
+            return;
+        }
+
+        // Redirect to customer dashboard with service pre-selected
+        localStorage.setItem('selected_service', JSON.stringify({ id: serviceId, name: serviceName }));
+        window.location.href = '/customer/dashboard';
+    }
+</script>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}
+

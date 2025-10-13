@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}Vendor Dashboard - HomeServe Pro{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h5 class="text-primary mb-3">Vendor Menu</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showSection('overview')">
+                            <i class="fas fa-home me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('jobs')">
+                            <i class="fas fa-briefcase me-2"></i>My Jobs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('earnings')">
+                            <i class="fas fa-dollar-sign me-2"></i>Earnings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('vendor_services')">
+                            <i class="fas fa-tools me-2"></i>My Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('profile')">
+                            <i class="fas fa-user-cog me-2"></i>Profile Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Vendor Dashboard</h1>
+                <div>
+                    <span class="badge bg-success">Active</span>
+                    <span id="userName" class="ms-2 text-muted"></span>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overviewSection" class="dashboard-section">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Jobs</h5>
+                                <h2 id="totalJobs">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body">
+                                <h5 class="card-title">Completed</h5>
+                                <h2 id="completedJobs">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Pending</h5>
+                                <h2 id="pendingJobs">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body">
+                                <h5 class="card-title">Earnings</h5>
+                                <h2 id="totalEarnings">₹0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Welcome, Vendor!</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Manage your jobs and track your earnings here.</p>
+                        <button class="btn btn-primary" onclick="showSection('jobs')">
+                            <i class="fas fa-briefcase me-2"></i>View My Jobs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jobs Section -->
+            <div id="jobsSection" class="dashboard-section d-none">
+                <h3 class="mb-4">My Jobs</h3>
+
+                <!-- Filter Tabs -->
+                <ul class="nav nav-tabs mb-3">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="filterJobs('all'); return false;">All Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="filterJobs('pending'); return false;">Pending</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="filterJobs('accepted'); return false;">Accepted</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="filterJobs('in_progress'); return false;">In Progress</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="filterJobs('completed'); return false;">Completed</a>
+                    </li>
+                </ul>
+
+                <div id="jobsList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2">Loading jobs...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Section -->
+            <div id="earningsSection" class="dashboard-section d-none">
+                <h3 class="mb-4">Earnings</h3>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Total Earnings</h6>
+                                <h3 class="text-success" id="earningsTotal">₹0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">This Month</h6>
+                                <h3 class="text-primary" id="earningsMonth">₹0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="text-muted">Pending Payment</h6>
+                                <h3 class="text-warning" id="earningsPending">₹0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="transactionsList">
+
+
+                            <p class="text-muted">No transactions yet. Complete jobs to start earning!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Services Section -->
+            <div id="vendor_servicesSection" class="dashboard-section d-none">
+                <h3 class="mb-4">My Services</h3>
+                <div id="vendorServicesList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2">Loading your services...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="dashboard-section d-none">
+                <h3 class="mb-4">Profile Settings</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="row">
+
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="profileName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="profileName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="profileEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="profileEmail" readonly>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="profilePhone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="profilePhone" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="profilePincode" class="form-label">Pincode</label>
+                                    <input type="text" class="form-control" id="profilePincode" maxlength="6">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="profileAddress" class="form-label">Address</label>
+                                <textarea class="form-control" id="profileAddress" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="profileServices" class="form-label">Services Offered</label>
+                                <input type="text" class="form-control" id="profileServices" placeholder="e.g., Plumbing, Electrical">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let allJobs = [];
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+
+        // Load dashboard data
+        await loadJobs();
+    });
+
+    async function loadJobs() {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch('/api/vendor/bookings', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                allJobs = data.data || [];
+
+                // Update statistics
+                document.getElementById('totalJobs').textContent = allJobs.length;
+                document.getElementById('completedJobs').textContent =
+                    allJobs.filter(j => j.status === 'completed').length;
+                document.getElementById('pendingJobs').textContent =
+                    allJobs.filter(j => j.status === 'pending' || j.status === 'accepted').length;
+
+                // Calculate earnings
+                const totalEarnings = allJobs
+                    .filter(j => j.status === 'completed')
+                    .reduce((sum, j) => sum + (j.amount || 0), 0);
+                document.getElementById('totalEarnings').textContent = '₹' + totalEarnings;
+
+                // Display jobs
+                displayJobs(allJobs);
+            }
+        } catch (error) {
+            console.error('Error loading jobs:', error);
+        }
+    }
+
+    function displayJobs(jobs) {
+        const jobsList = document.getElementById('jobsList');
+
+        if (jobs.length === 0) {
+            jobsList.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No jobs available at the moment.
+                </div>
+            `;
+            return;
+        }
+
+        jobsList.innerHTML = '<div class="row g-3"></div>';
+        const row = jobsList.querySelector('.row');
+
+        jobs.forEach(job => {
+            const statusBadge = getStatusBadge(job.status);
+            const jobDate = new Date(job.service_date || job.created_at).toLocaleDateString();
+
+            row.innerHTML += `
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">${job.service_name || 'Service'}</h5>
+                                ${statusBadge}
+                            </div>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-calendar me-1"></i>${jobDate}
+                                ${job.service_time ? ` at ${job.service_time}` : ''}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>${job.address || 'N/A'}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user me-1"></i>Customer: ${job.customer_name || 'N/A'}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Amount:</strong> ₹${job.amount || 0}
+                            </p>
+                            <div class="d-flex gap-2 mt-3">
+                                ${job.status === 'pending' ? `
+                                    <button class="btn btn-sm btn-success" onclick="acceptJob('${job._id || job.id}')">
+                                        <i class="fas fa-check me-1"></i>Accept
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="rejectJob('${job._id || job.id}')">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </button>
+                                ` : ''}
+                                ${job.status === 'accepted' ? `
+                                    <button class="btn btn-sm btn-primary" onclick="startJob('${job._id || job.id}')">
+                                        <i class="fas fa-play me-1"></i>Start Job
+                                    </button>
+                                ` : ''}
+                                ${job.status === 'in_progress' ? `
+                                    <button class="btn btn-sm btn-success" onclick="completeJob('${job._id || job.id}')">
+                                        <i class="fas fa-check-circle me-1"></i>Mark Complete
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewJobDetails('${job._id || job.id}')">
+                                    <i class="fas fa-eye me-1"></i>Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function filterJobs(status) {
+        currentFilter = status;
+
+        // Update active tab
+        document.querySelectorAll('.nav-tabs .nav-link').forEach(link => link.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Filter jobs
+        let filteredJobs = allJobs;
+        if (status !== 'all') {
+            filteredJobs = allJobs.filter(j => j.status === status);
+        }
+
+        displayJobs(filteredJobs);
+    }
+
+    function getStatusBadge(status) {
+        const badges = {
+            'pending': '<span class="badge bg-warning">Pending</span>',
+            'accepted': '<span class="badge bg-info">Accepted</span>',
+            'in_progress': '<span class="badge bg-primary">In Progress</span>',
+            'completed': '<span class="badge bg-success">Completed</span>',
+            'cancelled': '<span class="badge bg-danger">Cancelled</span>'
+        };
+        return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+    }
+
+    async function acceptJob(jobId) {
+        if (!confirm('Accept this job?')) return;
+        await updateJobStatus(jobId, 'accepted');
+    }
+
+    async function rejectJob(jobId) {
+        if (!confirm('Reject this job?')) return;
+        await updateJobStatus(jobId, 'cancelled');
+    }
+
+    async function startJob(jobId) {
+        if (!confirm('Start this job?')) return;
+        await updateJobStatus(jobId, 'in_progress');
+    }
+
+    async function completeJob(jobId) {
+        if (!confirm('Mark this job as complete?')) return;
+        await updateJobStatus(jobId, 'completed');
+    }
+
+    async function updateJobStatus(jobId, status) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/vendor/bookings/${jobId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('✅ Job status updated successfully!');
+                await loadJobs();
+            } else {
+                alert('❌ Failed to update job: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error updating job:', error);
+            alert('❌ Error updating job. Please try again.');
+        }
+    }
+
+    function viewJobDetails(jobId) {
+        const job = allJobs.find(j => (j._id || j.id) === jobId);
+        if (job) {
+            alert(`Job Details:\n\nService: ${job.service_name}\nCustomer: ${job.customer_name}\nDate: ${job.service_date}\nTime: ${job.service_time}\nAddress: ${job.address}\nAmount: ₹${job.amount}\nStatus: ${job.status}\n\nDescription: ${job.description || 'N/A'}`);
+        }
+    }
+
+    function showSection(section) {
+        document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById(section + 'Section').classList.remove('d-none');
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => link.classList.remove('active'));
+        if (event && event.target) {
+            event.target.classList.add('active');
+        }
+
+        // Load section data
+        if (section === 'jobs') {
+            loadJobs();
+        } else if (section === 'vendor_services') {
+            renderVendorServices();
+        } else if (section === 'profile') {
+            loadProfile();
+        }
+    }
+
+    function renderVendorServices() {
+        const list = document.getElementById('vendorServicesList');
+        const services = Array.isArray(currentUser.services) ? currentUser.services : [];
+        if (services.length === 0) {
+            list.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>No services added to your profile yet.</div>';
+            return;
+        }
+        let html = '<div class="row g-3">';
+        services.forEach(name => {
+            html += `
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title"><i class=\"fas fa-wrench me-2\"></i>${name}</h5>
+                  <p class="text-muted mb-2">This service is listed on your profile and customers can find you for it.</p>
+                  <span class="badge bg-secondary">Listed</span>
+                </div>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+        list.innerHTML = html;
+    }
+
+
+    function loadProfile() {
+        document.getElementById('profileName').value = currentUser.name || '';
+        document.getElementById('profileEmail').value = currentUser.email || '';
+        document.getElementById('profilePhone').value = currentUser.phone || '';
+        document.getElementById('profileAddress').value = currentUser.address || '';
+        document.getElementById('profilePincode').value = currentUser.pincode || '';
+        document.getElementById('profileServices').value = currentUser.services?.join(', ') || '';
+    }
+
+    // Handle profile form submission
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileForm = document.getElementById('profileForm');
+        if (profileForm) {
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const updatedData = {
+                    name: document.getElementById('profileName').value,
+                    phone: document.getElementById('profilePhone').value,
+                    address: document.getElementById('profileAddress').value,
+                    pincode: document.getElementById('profilePincode').value
+                };
+
+                try {
+                    const token = localStorage.getItem('access_token');
+                    const response = await fetch('/api/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        alert('✅ Profile updated successfully!');
+                        // Update local storage
+                        currentUser = { ...currentUser, ...updatedData };
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                        document.getElementById('userName').textContent = currentUser.name;
+                    } else {
+                        alert('❌ Failed to update profile: ' + (data.message || 'Unknown error'));
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    alert('❌ Error updating profile. Please try again.');
+                }
+            });
+        }
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+</script>
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+    }
+    .nav-link {
+        color: #333;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+    .nav-link:hover, .nav-link.active {
+        background-color: #e9ecef;
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+

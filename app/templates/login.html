@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Login - HomeServe Pro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">Welcome Back!</h2>
+                        <p class="text-muted">Login to your HomeServe Pro account</p>
+                    </div>
+
+                    <div id="alert-container"></div>
+
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required 
+                                   placeholder="Enter your email">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   placeholder="Enter your password">
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 mb-3" id="loginBtn">
+                            <span id="loginBtnText">Login</span>
+                            <span id="loginBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </span>
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <p class="mb-2">Don't have an account? <a href="/register" class="text-primary">Register here</a></p>
+                        <p><a href="/" class="text-muted">Back to Home</a></p>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted mb-2"><small>Test Accounts (password: password123)</small></p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="fillLogin('admin@homeservepro.com')">
+                                Super Admin
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="fillLogin('customer@test.com')">
+                                Customer
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="fillLogin('vendor@test.com')">
+                                Vendor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fill login form with test credentials
+    function fillLogin(email) {
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = 'password123';
+    }
+
+    // Show alert message
+    function showAlert(message, type = 'danger') {
+        const alertContainer = document.getElementById('alert-container');
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const loginBtn = document.getElementById('loginBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginBtnSpinner = document.getElementById('loginBtnSpinner');
+
+        // Get form data
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Disable button and show spinner
+        loginBtn.disabled = true;
+        loginBtnText.classList.add('d-none');
+        loginBtnSpinner.classList.remove('d-none');
+
+        try {
+            // Send login request
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Store tokens
+                localStorage.setItem('access_token', data.data.access_token);
+                localStorage.setItem('refresh_token', data.data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(data.data.user));
+
+                // Show success message
+                showAlert('Login successful! Redirecting...', 'success');
+
+                // Redirect based on role
+                setTimeout(() => {
+                    const role = data.data.user.role;
+                    switch(role) {
+                        case 'super_admin':
+                        case 'ops_manager':
+                        case 'onboard_manager':
+                            window.location.href = '/admin/dashboard';
+                            break;
+                        case 'vendor':
+                            window.location.href = '/vendor/dashboard';
+                            break;
+                        case 'customer':
+                        default:
+                            window.location.href = '/customer/dashboard';
+                            break;
+                    }
+                }, 1000);
+            } else {
+                showAlert(data.message || 'Login failed. Please check your credentials.');
+                loginBtn.disabled = false;
+                loginBtnText.classList.remove('d-none');
+                loginBtnSpinner.classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showAlert('An error occurred. Please try again.');
+            loginBtn.disabled = false;
+            loginBtnText.classList.remove('d-none');
+            loginBtnSpinner.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}
+

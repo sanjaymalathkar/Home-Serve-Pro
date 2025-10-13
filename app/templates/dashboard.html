@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting... - HomeServe Pro</title>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-center">
+            <h2>Redirecting to your dashboard...</h2>
+            <div style="margin-top: 20px;">
+                <div style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        // Redirect based on user role
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = localStorage.getItem('access_token');
+
+        if (!token) {
+            window.location.href = '/login';
+        } else {
+            const role = user.role;
+            switch(role) {
+                case 'super_admin':
+                case 'ops_manager':
+                case 'onboard_manager':
+                    window.location.href = '/admin/dashboard';
+                    break;
+                case 'vendor':
+                    window.location.href = '/vendor/dashboard';
+                    break;
+                case 'customer':
+                default:
+                    window.location.href = '/customer/dashboard';
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
+
