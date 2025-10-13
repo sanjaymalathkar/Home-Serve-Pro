@@ -240,19 +240,19 @@ function setupFormHandlers() {
             certificationFile.addEventListener('change', () => handleDocUpload('service_certification', 'certificationFile', 'certificationUrl', 'certificationUploaded'));
         }
     }
-
+    
     // Create service form
     const createServiceForm = document.getElementById('createServiceForm');
     if (createServiceForm) {
         createServiceForm.addEventListener('submit', createService);
     }
-
+    
     // Payout request form
     const payoutForm = document.getElementById('payoutRequestForm');
     if (payoutForm) {
         payoutForm.addEventListener('submit', requestPayout);
     }
-
+    
     // Profile form
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
@@ -297,24 +297,40 @@ async function handleDocUpload(docType, fileInputId, urlHiddenId, uploadedBadgeI
     }
 }
 
+async function ensureUploaded(docType, fileInputId, urlHiddenId, uploadedBadgeId) {
+    const urlHidden = document.getElementById(urlHiddenId);
+    if (urlHidden && urlHidden.value) return; // already uploaded
+    const fileInput = document.getElementById(fileInputId);
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        await handleDocUpload(docType, fileInputId, urlHiddenId, uploadedBadgeId);
+    }
+}
+
 async function submitVerification(event) {
     event.preventDefault();
-    
+
+    // Fallback: if user selected files but upload hasn't run yet, upload them now
+    await Promise.all([
+        ensureUploaded('id_proof', 'idProofFile', 'idProofUrl', 'idProofUploaded'),
+        ensureUploaded('business_license', 'businessLicenseFile', 'businessLicenseUrl', 'businessLicenseUploaded'),
+        ensureUploaded('service_certification', 'certificationFile', 'certificationUrl', 'certificationUploaded')
+    ]);
+
     const idProof = document.getElementById('idProofUrl').value.trim();
     const businessLicense = document.getElementById('businessLicenseUrl').value.trim();
     const certification = document.getElementById('certificationUrl').value.trim();
-    
+
     const documents = {};
     if (idProof) documents.id_proof = idProof;
     if (businessLicense) documents.business_license = businessLicense;
     if (certification) documents.service_certification = certification;
-    
+
     // Validate at least one document
     if (Object.keys(documents).length === 0) {
-        alert('⚠️ Please provide at least one document URL');
+        alert('⚠️ Please select or upload at least one document');
         return;
     }
-    
+
     try {
         const token = localStorage.getItem('access_token');
         const response = await fetch('/api/vendor/verify_profile', {
@@ -325,9 +341,9 @@ async function submitVerification(event) {
             },
             body: JSON.stringify({ documents })
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
             alert('✅ Verification documents submitted successfully! Please wait for admin approval.');
             document.getElementById('verificationForm').reset();
@@ -443,7 +459,7 @@ function displayBookings(bookings) {
                         <p class="mb-2">
                             <strong>Amount:</strong> ₹${booking.amount || booking.total_amount || 0}
                         </p>
-                        ${booking.notes ? `<p class="text-muted small mb-2"><i class="fas fa-sticky-note me-1"></i>${booking.notes}</p>` : ''}
+                        ${booking.notes ? `<p class=\"text-muted small mb-2\"><i class=\"fas fa-sticky-note me-1\"></i>${booking.notes}</p>` : ''}
                         <div class="mt-2">
                             ${booking.status === 'pending' ? `
                                 <button class="btn btn-sm btn-success me-1" onclick="acceptBooking('${booking.id || booking._id}')">

@@ -15,7 +15,7 @@ from app.models.audit_log import AuditLog
 from app.models.service import Service
 from app.utils.decorators import vendor_required
 from app.utils.error_handlers import api_error_response, api_success_response
-from app.utils.file_upload import save_image, get_file_url
+from app.utils.file_upload import save_image, save_upload_file, get_file_url
 from app import socketio
 import os
 import re
@@ -270,6 +270,47 @@ def upload_documents(user):
 
     except Exception as e:
         return api_error_response(f'Failed to upload documents: {str(e)}', 500)
+
+@vendor_bp.route('/verification/upload', methods=['POST'])
+@vendor_required
+def upload_verification_document(user):
+    """Upload a single verification document (image or PDF) and store reference in MongoDB.
+    Accepts multipart/form-data with fields:
+      - document: file
+      - doc_type: one of ['id_proof','business_license','service_certification']
+    Returns a public URL that can be used in verification submission.
+    """
+    try:
+        vendor = Vendor.find_by_user_id(str(user['_id']))
+        if not vendor:
+            return api_error_response('Vendor profile not found', 404)
+
+        if 'document' not in request.files:
+            return api_error_response('No document file provided', 400)
+
+        file = request.files['document']
+        doc_type = request.form.get('doc_type')
+        if doc_type not in ['id_proof', 'business_license', 'service_certification']:
+            return api_error_response('Invalid or missing document type', 400)
+
+        # Save file (supports images and pdf via allowed extensions)
+        rel_path = save_upload_file(file, subfolder='vendor_documents')
+        if not rel_path:
+            return api_error_response('Invalid file type or failed to save file', 400)
+
+        # Build URL and persist minimal reference on vendor (kyc_docs)
+        file_url = get_file_url(rel_path)
+        Vendor.add_kyc_document(str(vendor['_id']), file_url, doc_type)
+
+        return api_success_response({
+            'document': {
+                'type': doc_type,
+                'url': file_url
+            }
+        }, 'Document uploaded successfully')
+    except Exception as e:
+        return api_error_response(f'Failed to upload document: {str(e)}', 500)
+
 
 
 @vendor_bp.route('/register/bank-details', methods=['POST'])
@@ -1913,13 +1954,13 @@ def toggle_availability(user):
     """Toggle vendor availability status."""
     try:
         vendor = Vendor.find_by_user_id(str(user['_id']))
-        
+
         if not vendor:
             return api_error_response('Vendor profile not found', 404)
-        
+
         Vendor.toggle_availability(str(vendor['_id']))
         updated_vendor = Vendor.find_by_id(str(vendor['_id']))
-        
+
         # Log availability change
         AuditLog.log(
             action=AuditLog.ACTION_UPDATE,
@@ -1929,11 +1970,11 @@ def toggle_availability(user):
             details={'availability': updated_vendor['availability']},
             ip_address=request.remote_addr
         )
-        
+
         return api_success_response({
             'availability': updated_vendor['availability']
         }, 'Availability updated successfully')
-        
+
     except Exception as e:
         return api_error_response(f'Failed to update availability: {str(e)}', 500)
 
@@ -1944,15 +1985,15 @@ def get_bookings(user):
     """Get all bookings for the vendor."""
     try:
         vendor = Vendor.find_by_user_id(str(user['_id']))
-        
+
         if not vendor:
             return api_error_response('Vendor profile not found', 404)
-        
+
         status = request.args.get('status', '')
         page = int(request.args.get('page', 1))
         limit = int(request.args.get('limit', 20))
         skip = (page - 1) * limit
-        
+
         if status:
             bookings = Booking.find_by_status(status, skip, limit)
             bookings = [b for b in bookings if str(b['vendor_id']) == str(vendor['_id'])]
@@ -1960,14 +2001,14 @@ def get_bookings(user):
         else:
             bookings = Booking.find_by_vendor(str(vendor['_id']), skip, limit)
             total = Booking.count({'vendor_id': vendor['_id']})
-        
+
         return api_success_response({
             'bookings': [Booking.to_dict(b) for b in bookings],
             'total': total,
             'page': page,
             'pages': (total + limit - 1) // limit
         })
-        
+
     except Exception as e:
         return api_error_response(f'Failed to get bookings: {str(e)}', 500)
 

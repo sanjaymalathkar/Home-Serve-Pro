@@ -169,23 +169,46 @@ class Booking:
         return result.modified_count > 0
     
     @staticmethod
-    def find_all(filters=None, skip=0, limit=20):
-        """Find all bookings with optional filters."""
+    def find_all(filters=None, sort=None, skip=0, limit=20):
+        """Find all bookings with optional filters and sorting.
+        Args:
+            filters (dict): Mongo query filters
+            sort (list|tuple|str): e.g., [('created_at', -1)] or 'created_at'
+            skip (int): number of documents to skip
+            limit (int): max documents to return
+        """
         filters = filters or {}
-        return list(
-            mongo.db[Booking.COLLECTION]
-            .find(filters)
-            .sort('created_at', -1)
-            .skip(skip)
-            .limit(limit)
-        )
-    
+        # Coerce common ID fields from string to ObjectId when possible
+        try:
+            for key in ('vendor_id', 'customer_id', 'service_id', '_id'):
+                if key in filters and isinstance(filters[key], str):
+                    filters[key] = ObjectId(filters[key])
+        except Exception:
+            pass
+        cursor = mongo.db[Booking.COLLECTION].find(filters)
+        if sort:
+            cursor = cursor.sort(sort)
+        else:
+            cursor = cursor.sort('created_at', -1)
+        if skip:
+            cursor = cursor.skip(skip)
+        if limit:
+            cursor = cursor.limit(limit)
+        return list(cursor)
+
     @staticmethod
     def count(filters=None):
         """Count bookings matching filters."""
         filters = filters or {}
+        # Coerce common ID fields from string to ObjectId when possible
+        try:
+            for key in ('vendor_id', 'customer_id', 'service_id', '_id'):
+                if key in filters and isinstance(filters[key], str):
+                    filters[key] = ObjectId(filters[key])
+        except Exception:
+            pass
         return mongo.db[Booking.COLLECTION].count_documents(filters)
-    
+
     @staticmethod
     def get_pending_signatures(days=2):
         """Get bookings with pending signatures older than specified days."""

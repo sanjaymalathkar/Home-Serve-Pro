@@ -118,7 +118,7 @@ def get_public_vendors():
 
         if service_type:
             # Filter by service category - check if any service in vendor's services matches the category
-            category_services = list(Service.find_all({'category': service_type, 'active': True}))
+            category_services = Service.find_by_category(service_type)
             if category_services:
                 service_names = [s.get('name') for s in category_services]
                 filters['services'] = {'$in': service_names}

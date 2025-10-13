@@ -67,8 +67,13 @@ def search_by_pincode(user):
         if search_query:
             service_filters['name'] = {'$regex': search_query, '$options': 'i'}
 
-        # Get all active services
-        services = list(Service.find_all(service_filters))
+        # Get all active services and apply optional filters locally
+        services = Service.find_all_active()
+        if service_category:
+            services = [s for s in services if s.get('category') == service_category]
+        if search_query:
+            q = search_query.lower()
+            services = [s for s in services if s.get('name') and q in s.get('name', '').lower()]
 
         # Get vendors in the area
         vendor_filters = {

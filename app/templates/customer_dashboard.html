@@ -731,6 +731,9 @@
                                     <button class="btn btn-primary btn-sm w-100 mt-3" onclick="bookService('${serviceId}', '${service.name}')">
                                         <i class="fas fa-calendar-check me-1"></i>Book Now
                                     </button>
+                                    <button class="btn btn-outline-secondary btn-sm w-100 mt-2" onclick="browseVendorsForService('${serviceId}')">
+                                        <i class="fas fa-user-tie me-1"></i>View Providers
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -967,7 +970,7 @@
             const params = new URLSearchParams();
             if (serviceId) params.set('service_id', serviceId);
             if (pincode) params.set('pincode', pincode);
-            params.set('availability', 'true');
+            // Do not force availability filter; show all approved vendors
             params.set('limit', '20'); // Limit to 20 vendors for better performance
 
             console.log('Loading vendors with params:', params.toString());
@@ -1004,6 +1007,24 @@
             </div>`;
         }
     }
+    async function browseVendorsForService(serviceId) {
+        try {
+            // Switch to Vendors section
+            showSection('vendors');
+            // Ensure filters are initialized
+            await initVendorsFilters();
+            // Pre-select the service and user's pincode if available
+            const select = document.getElementById('vendorServiceSelect');
+            if (select) select.value = serviceId;
+            const pin = document.getElementById('vendorPincode');
+            if (pin && !pin.value && currentUser.pincode) pin.value = currentUser.pincode;
+            // Load vendors with the selected service
+            await loadVendors();
+        } catch (e) {
+            console.error('Failed to open vendors for service', e);
+        }
+    }
+
 
     function renderVendors(vendors, filtersApplied = {}) {
         const list = document.getElementById('vendorsList');

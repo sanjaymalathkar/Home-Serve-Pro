@@ -111,7 +111,7 @@
                 <h3 class="mb-4">
                     <i class="fas fa-id-card me-2"></i>Verify Your Profile
                 </h3>
-                
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Verification Status:</strong> <span id="verificationStatus">Checking...</span>
@@ -125,24 +125,30 @@
                         <form id="verificationForm">
                             <div class="mb-3">
                                 <label class="form-label">ID Proof (Aadhaar, PAN, Driving License) *</label>
-                                <input type="text" class="form-control" id="idProofUrl" placeholder="Enter document URL">
-                                <small class="text-muted">Upload your ID proof document</small>
+                                <input type="file" class="form-control" id="idProofFile" accept="image/*,application/pdf">
+                                <input type="hidden" id="idProofUrl">
+                                <div class="form-text" id="idProofHelp">Upload your ID proof document (image or PDF). Max 16MB.</div>
+                                <div class="small text-success mt-1 d-none" id="idProofUploaded"><i class="fas fa-check-circle me-1"></i>Uploaded</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Business License</label>
-                                <input type="text" class="form-control" id="businessLicenseUrl" placeholder="Enter document URL">
-                                <small class="text-muted">Upload your business registration or license</small>
+                                <input type="file" class="form-control" id="businessLicenseFile" accept="image/*,application/pdf">
+                                <input type="hidden" id="businessLicenseUrl">
+                                <div class="form-text">Upload your business registration or license (image or PDF). Max 16MB.</div>
+                                <div class="small text-success mt-1 d-none" id="businessLicenseUploaded"><i class="fas fa-check-circle me-1"></i>Uploaded</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Service Certification</label>
-                                <input type="text" class="form-control" id="certificationUrl" placeholder="Enter document URL">
-                                <small class="text-muted">Upload relevant skill certifications</small>
+                                <input type="file" class="form-control" id="certificationFile" accept="image/*,application/pdf">
+                                <input type="hidden" id="certificationUrl">
+                                <div class="form-text">Upload relevant skill certifications (image or PDF). Max 16MB.</div>
+                                <div class="small text-success mt-1 d-none" id="certificationUploaded"><i class="fas fa-check-circle me-1"></i>Uploaded</div>
                             </div>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-2"></i>Submit for Verification
                             </button>
                         </form>
-                        
+
                         <div id="rejectionReason" class="alert alert-danger mt-3 d-none">
                             <strong>Rejection Reason:</strong> <span id="rejectionText"></span>
                         </div>
@@ -155,7 +161,7 @@
                 <h3 class="mb-4">
                     <i class="fas fa-plus-circle me-2"></i>Create Custom Service
                 </h3>
-                
+
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">Add New Service Offering</h5>
@@ -247,7 +253,7 @@
                 <h3 class="mb-4">
                     <i class="fas fa-wallet me-2"></i>Secure Payouts
                 </h3>
-                
+
                 <div id="payoutsDisabled" class="alert alert-warning d-none">
                     <i class="fas fa-lock me-2"></i>
                     <strong>Payouts will be enabled after verification approval.</strong>
@@ -343,7 +349,7 @@
     </div>
 </div>
 
-<script src="/static/js/vendor_dashboard.js"></script>
+
 
 <style>
     .sidebar {
@@ -362,5 +368,39 @@
 </style>
 
 <script src="{{ url_for('static', filename='js/vendor_dashboard.js') }}"></script>
+
+<script>
+// Fallback: define navigation helpers if external JS failed to load
+(function(){
+  if (typeof window.showSection !== 'function') {
+    window.showSection = function(section, evt){
+      if (evt && evt.preventDefault) evt.preventDefault();
+      document.querySelectorAll('.dashboard-section').forEach(function(s){ s.classList.add('d-none'); });
+      var el = document.getElementById(section + 'Section');
+      if (el) el.classList.remove('d-none');
+      // active state on sidebar
+      document.querySelectorAll('.sidebar .nav-link').forEach(function(l){ l.classList.remove('active'); });
+      if (evt && evt.target){ var link = evt.target.closest('.nav-link'); if (link) link.classList.add('active'); }
+      return false;
+    }
+  }
+  if (typeof window.filterBookings !== 'function') {
+    window.filterBookings = function(status, evt){
+      if (evt && evt.preventDefault) evt.preventDefault();
+      document.querySelectorAll('.nav-tabs .nav-link').forEach(function(l){ l.classList.remove('active'); });
+      if (evt && evt.target){ var link = evt.target.closest('.nav-link'); if (link) link.classList.add('active'); }
+      // Hide or show cards by data-status if present
+      var cards = document.querySelectorAll('#bookingsList [data-status]');
+      if (!cards.length) return false;
+      cards.forEach(function(card){
+        var ok = (status === 'all') || (card.getAttribute('data-status') === status);
+        card.parentElement.classList.toggle('d-none', !ok);
+      });
+      return false;
+    }
+  }
+})();
+</script>
+
 {% endblock %}
 
