@@ -395,7 +395,7 @@ This project is proprietary software. All rights reserved.
 
 ## 📞 Support
 
-For support, email support@homeservepro.com
+For support, email sanjaymalathkarsr33@gmail.com
 
 ---
 
